@@ -14,26 +14,31 @@ interface Props {
 
 export default function Sidebar({ onCreateClick, onDateSelect, undatedEvents, order, onOrderChange }: Props) {
   return (
-    <aside className="w-64 shrink-0 flex flex-col border-r border-[#dadce0] overflow-hidden">
-      <div className="p-3">
+    <aside className="w-64 shrink-0 flex flex-col border-r border-gray-200 bg-white overflow-hidden">
+
+      {/* Create button */}
+      <div className="px-4 pt-4 pb-2">
         <button
           onClick={onCreateClick}
-          className="flex items-center gap-3 pl-4 pr-6 py-3 rounded-2xl bg-white shadow-md hover:shadow-lg transition-shadow text-[#3c4043] text-sm font-medium"
+          className="flex items-center gap-3 pl-3 pr-5 py-2.5 rounded-2xl shadow-md hover:shadow-lg bg-white transition-shadow text-gray-900 text-sm font-semibold"
         >
-          <svg className="w-5 h-5 text-[#1a73e8]" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+          <svg className="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
           </svg>
           Create
         </button>
       </div>
 
-      <div className="py-2">
+      {/* Mini calendar */}
+      <div className="mt-1">
         <MiniCalendar onDateSelect={onDateSelect} />
       </div>
 
-      <div className="mx-4 border-t border-[#dadce0] my-2" />
+      {/* Divider */}
+      <div className="mx-4 my-3 border-t border-gray-200" />
 
-      <div className="flex-1 px-3 pb-3 overflow-hidden flex flex-col min-h-0">
+      {/* Undated tasks */}
+      <div className="flex-1 px-3 pb-4 min-h-0 flex flex-col overflow-hidden">
         <TaskList events={undatedEvents} order={order} onOrderChange={onOrderChange} />
       </div>
     </aside>

@@ -1,123 +1,114 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #3c4043;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #ffffff;
+  color: #111827;
   font-family: Roboto, Arial, sans-serif;
 }
 
-/* ── FullCalendar: Google Calendar style ── */
+/* ── FullCalendar overrides ── */
 
-.fc {
-  font-family: Roboto, Arial, sans-serif;
-}
+.fc { font-family: Roboto, Arial, sans-serif; }
 
-/* Day-of-week header (S M T W T F S) */
-.fc-col-header-cell {
-  padding: 8px 0 !important;
-  border-color: #dadce0 !important;
-}
-
-.fc-col-header-cell-cushion {
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  color: #70757a !important;
-  text-transform: uppercase;
-  text-decoration: none !important;
-}
-
-/* Day number */
-.fc-daygrid-day-number {
+/* ── Day-of-week headers (Sun Mon Tue …) ── */
+.fc .fc-col-header-cell-cushion {
   font-size: 12px !important;
-  color: #3c4043 !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  text-transform: uppercase !important;
   text-decoration: none !important;
-  padding: 4px 8px !important;
-  line-height: 1;
+  letter-spacing: 0.04em !important;
+}
+
+/* ── Day numbers ── */
+.fc .fc-daygrid-day-number {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #111827 !important;
+  text-decoration: none !important;
+  padding: 6px 8px !important;
+  line-height: 1 !important;
 }
 
 /* Today circle */
-.fc-day-today .fc-daygrid-day-number {
-  background: #1a73e8 !important;
-  color: #fff !important;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 4px !important;
+.fc .fc-day-today .fc-daygrid-day-number {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  background: #2563eb !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
   padding: 0 !important;
+  margin: 4px !important;
 }
 
-.fc-day-today {
-  background: rgba(26, 115, 232, 0.05) !important;
+/* Today cell tint */
+.fc .fc-day-today {
+  background: rgba(37, 99, 235, 0.05) !important;
 }
-
-/* Time grid today */
-.fc-timegrid-col.fc-day-today {
-  background: rgba(26, 115, 232, 0.05) !important;
-}
-
-/* Events */
-.fc-event {
-  border: none !important;
-  border-radius: 4px !important;
-  padding: 1px 5px !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  cursor: pointer;
-}
-
-.fc-event-title {
-  font-weight: 500 !important;
+.fc .fc-timegrid-col.fc-day-today {
+  background: rgba(37, 99, 235, 0.05) !important;
 }
 
 /* Grid borders */
+.fc .fc-scrollgrid,
 .fc td,
 .fc th {
-  border-color: #dadce0 !important;
+  border-color: #e5e7eb !important;
 }
 
-.fc-scrollgrid {
-  border-color: #dadce0 !important;
+.fc .fc-scrollgrid {
+  border-left-width: 0 !important;
 }
 
-.fc-scrollgrid-section > td {
+/* Column header row */
+.fc .fc-col-header-cell {
+  padding: 6px 0 !important;
+  border-color: #e5e7eb !important;
+}
+
+/* Remove today highlight on header cell */
+.fc .fc-col-header-cell.fc-day-today {
+  background: transparent !important;
+}
+
+/* Today header text — keep same dark color */
+.fc .fc-day-today .fc-col-header-cell-cushion {
+  color: #2563eb !important;
+}
+
+/* Events */
+.fc .fc-event {
   border: none !important;
+  border-radius: 4px !important;
+  padding: 1px 5px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
 }
 
-/* "more" link */
-.fc-daygrid-more-link {
+/* Time grid */
+.fc .fc-timegrid-slot { height: 40px !important; }
+
+.fc .fc-timegrid-slot-label-cushion {
   font-size: 11px !important;
-  color: #1a73e8 !important;
+  font-weight: 500 !important;
+  color: #374151 !important;
 }
 
-/* Time grid slot height */
-.fc-timegrid-slot {
-  height: 48px !important;
+/* Now indicator */
+.fc .fc-timegrid-now-indicator-line  { border-color: #dc2626 !important; }
+.fc .fc-timegrid-now-indicator-arrow {
+  border-top-color:    #dc2626 !important;
+  border-bottom-color: #dc2626 !important;
 }
 
-.fc-timegrid-slot-label-cushion {
-  font-size: 10px !important;
-  color: #70757a !important;
-}
-
-/* Remove top-left empty corner border */
-.fc-scrollgrid-section-header .fc-scroller {
-  overflow: hidden !important;
-}
-
-/* Hover on day cell */
-.fc-daygrid-day:hover .fc-daygrid-day-frame {
-  background: rgba(0, 0, 0, 0.02);
+/* "X more" link */
+.fc .fc-daygrid-more-link {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #2563eb !important;
 }
