@@ -12,4 +12,5 @@ export interface CalendarEvent {
   assigned_to?: number;
   color?: string;
   created_at: string;
+  updated_at?: string;
 }

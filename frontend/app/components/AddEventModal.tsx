@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { createEvent, assignTask } from "../lib/api";
+import { bus } from "../lib/bus";
 
 interface Props {
   selectedDate?: string;
   onClose: () => void;
-  onSaved: () => void;
 }
 
-export default function AddEventModal({ selectedDate, onClose, onSaved }: Props) {
+export default function AddEventModal({ selectedDate, onClose }: Props) {
   const [mode, setMode] = useState<"add" | "assign">("add");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -22,141 +22,168 @@ export default function AddEventModal({ selectedDate, onClose, onSaved }: Props)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
+      let saved;
       if (mode === "assign") {
-        await assignTask({
+        saved = await assignTask({
           title,
           description,
           event_date: eventDate || undefined,
           start_time: startTime || undefined,
           end_time: endTime || undefined,
-          created_by: 1, // TODO: replace with logged-in user id from Keycloak
+          created_by: 1, // TODO: replace with Keycloak user id
           assigned_to: parseInt(assignedTo),
         });
       } else {
-        await createEvent({
+        saved = await createEvent({
           title,
           description,
           event_date: eventDate || undefined,
           start_time: startTime || undefined,
           end_time: endTime || undefined,
           event_type: "task",
-          created_by: 1, // TODO: replace with logged-in user id from Keycloak
+          created_by: 1, // TODO: replace with Keycloak user id
         });
       }
-      onSaved();
+      bus.emit("task:created", saved);
       onClose();
     } finally {
       setLoading(false);
     }
   };
 
+  const inputCls =
+    "w-full border-0 border-b border-[#dadce0] py-1.5 text-sm text-[#3c4043] focus:outline-none focus:border-[#1a73e8] bg-transparent transition";
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">
-            {mode === "add" ? "Add Task" : "Assign Task"}
-          </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="absolute inset-0 bg-black/30" />
+
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 pt-5 pb-3">
+          <div className="flex gap-1 bg-[#f1f3f4] rounded-lg p-1">
+            <button
+              onClick={() => setMode("add")}
+              className={`px-4 py-1 rounded-md text-sm font-medium transition
+                ${mode === "add" ? "bg-white shadow-sm text-[#1a73e8]" : "text-[#70757a] hover:text-[#3c4043]"}`}
+            >
+              Add task
+            </button>
+            <button
+              onClick={() => setMode("assign")}
+              className={`px-4 py-1 rounded-md text-sm font-medium transition
+                ${mode === "assign" ? "bg-white shadow-sm text-[#34a853]" : "text-[#70757a] hover:text-[#3c4043]"}`}
+            >
+              Assign task
+            </button>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f1f3f4] text-[#70757a] transition"
+          >
+            ✕
+          </button>
         </div>
 
-        {/* Toggle */}
-        <div className="flex bg-gray-100 rounded-lg p-1 mb-5">
-          <button
-            className={`flex-1 py-1.5 rounded-md text-sm font-medium transition ${mode === "add" ? "bg-white shadow text-blue-600" : "text-gray-500"}`}
-            onClick={() => setMode("add")}
-          >
-            Add Task
-          </button>
-          <button
-            className={`flex-1 py-1.5 rounded-md text-sm font-medium transition ${mode === "assign" ? "bg-white shadow text-green-600" : "text-gray-500"}`}
-            onClick={() => setMode("assign")}
-          >
-            Assign Task
-          </button>
-        </div>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4">
+          <input
+            required
+            autoFocus
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Add title"
+            className="w-full border-0 border-b-2 border-[#dadce0] py-1 text-lg text-[#3c4043] placeholder-[#bdc1c6] focus:outline-none focus:border-[#1a73e8] bg-transparent transition"
+          />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-sm text-gray-600 mb-1 block">Title *</label>
-            <input
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-              placeholder="Task title"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600 mb-1 block">Description</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-              rows={2}
-              placeholder="Optional description"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600 mb-1 block">Date (optional)</label>
-            <input
-              type="date"
-              value={eventDate}
-              onChange={(e) => setEventDate(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-            />
-          </div>
-
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <label className="text-sm text-gray-600 mb-1 block">Start Time</label>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <svg className="w-4 h-4 text-[#70757a] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+              </svg>
               <input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                type="date"
+                value={eventDate}
+                onChange={(e) => setEventDate(e.target.value)}
+                className={inputCls}
               />
             </div>
-            <div className="flex-1">
-              <label className="text-sm text-gray-600 mb-1 block">End Time</label>
-              <input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+
+            <div className="flex items-center gap-3">
+              <svg className="w-4 h-4 text-[#70757a] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/>
+              </svg>
+              <div className="flex gap-2 flex-1">
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className={inputCls}
+                  placeholder="Start"
+                />
+                <span className="text-[#70757a] self-end pb-1.5">–</span>
+                <input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className={inputCls}
+                  placeholder="End"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <svg className="w-4 h-4 text-[#70757a] shrink-0 mt-1.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              </svg>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Add description"
+                rows={2}
+                className="w-full border-0 border-b border-[#dadce0] py-1 text-sm text-[#3c4043] placeholder-[#bdc1c6] focus:outline-none focus:border-[#1a73e8] bg-transparent transition resize-none"
               />
             </div>
+
+            {mode === "assign" && (
+              <div className="flex items-center gap-3">
+                <svg className="w-4 h-4 text-[#70757a] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+                <input
+                  required
+                  type="number"
+                  value={assignedTo}
+                  onChange={(e) => setAssignedTo(e.target.value)}
+                  placeholder="Assign to (User ID)"
+                  className={inputCls}
+                />
+              </div>
+            )}
           </div>
 
-          {mode === "assign" && (
-            <div>
-              <label className="text-sm text-gray-600 mb-1 block">Assign To (User ID) *</label>
-              <input
-                required
-                type="number"
-                value={assignedTo}
-                onChange={(e) => setAssignedTo(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-300"
-                placeholder="Enter user ID"
-              />
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-2 rounded-lg text-white font-medium text-sm transition ${
-              mode === "assign"
-                ? "bg-green-500 hover:bg-green-600"
-                : "bg-blue-500 hover:bg-blue-600"
-            } disabled:opacity-50`}
-          >
-            {loading ? "Saving..." : mode === "add" ? "Add Task" : "Assign Task"}
-          </button>
+          {/* Footer */}
+          <div className="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2 text-sm font-medium text-[#1a73e8] rounded hover:bg-[#e8f0fe] transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className={`px-5 py-2 text-sm font-medium text-white rounded transition disabled:opacity-50
+                ${mode === "assign" ? "bg-[#34a853] hover:bg-[#2d9147]" : "bg-[#1a73e8] hover:bg-[#1765cc]"}`}
+            >
+              {loading ? "Saving…" : "Save"}
+            </button>
+          </div>
         </form>
       </div>
     </div>

@@ -1,61 +1,58 @@
 "use client";
 
 import { CalendarEvent } from "../types/event";
+import { deleteEvent } from "../lib/api";
+import { bus } from "../lib/bus";
 
 interface Props {
   events: CalendarEvent[];
   order: "newest" | "oldest";
   onOrderChange: (order: "newest" | "oldest") => void;
-  onDelete: (id: number) => void;
 }
 
-export default function TaskList({ events, order, onOrderChange, onDelete }: Props) {
+export default function TaskList({ events, order, onOrderChange }: Props) {
+  const handleDelete = async (id: number) => {
+    await deleteEvent(id);
+    bus.emit("task:deleted", { id });
+  };
+
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-semibold text-gray-700 text-sm">Undated Tasks</h2>
+    <div className="flex flex-col h-full min-h-0">
+      <div className="flex items-center justify-between mb-2 shrink-0">
+        <span className="text-xs font-medium text-[#3c4043]">Undated tasks</span>
         <select
           value={order}
           onChange={(e) => onOrderChange(e.target.value as "newest" | "oldest")}
-          className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600 focus:outline-none"
+          className="text-[10px] border border-[#dadce0] rounded px-1.5 py-0.5 text-[#70757a] focus:outline-none bg-white"
         >
-          <option value="newest">Newest First</option>
-          <option value="oldest">Oldest First</option>
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
         </select>
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-2">
+      <div className="flex-1 overflow-y-auto space-y-1.5 min-h-0">
         {events.length === 0 && (
-          <p className="text-xs text-gray-400 text-center mt-6">No undated tasks</p>
+          <p className="text-[11px] text-[#70757a] text-center mt-4">No undated tasks</p>
         )}
         {events.map((event) => (
           <div
             key={event.id}
-            className="rounded-lg p-3 text-sm border-l-4"
+            className="rounded px-2.5 py-2 text-xs border-l-[3px] group"
             style={{
-              borderLeftColor: event.assigned_to ? "#2ecc71" : "#3498db",
-              backgroundColor: event.assigned_to ? "#f0fdf4" : "#eff6ff",
+              borderLeftColor: event.assigned_to ? "#34a853" : "#4285f4",
+              backgroundColor: event.assigned_to ? "#f0fdf4" : "#f0f4ff",
             }}
           >
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="font-medium text-gray-800">{event.title}</p>
+            <div className="flex items-start justify-between gap-1">
+              <div className="min-w-0">
+                <p className="font-medium text-[#3c4043] truncate">{event.title}</p>
                 {event.description && (
-                  <p className="text-xs text-gray-500 mt-0.5">{event.description}</p>
+                  <p className="text-[10px] text-[#70757a] mt-0.5 truncate">{event.description}</p>
                 )}
-                <span
-                  className="inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-medium"
-                  style={{
-                    backgroundColor: event.assigned_to ? "#dcfce7" : "#dbeafe",
-                    color: event.assigned_to ? "#16a34a" : "#2563eb",
-                  }}
-                >
-                  {event.assigned_to ? "Assigned" : "Added"}
-                </span>
               </div>
               <button
-                onClick={() => onDelete(event.id)}
-                className="text-gray-300 hover:text-red-400 text-xs ml-2"
+                onClick={() => handleDelete(event.id)}
+                className="text-[#dadce0] hover:text-[#ea4335] shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 ✕
               </button>
