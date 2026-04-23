@@ -136,7 +136,7 @@ export default function Calendar() {
               <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
             </svg>
           </button>
-          <h2 className="text-xl font-semibold text-gray-900 ml-1 min-w-[180px] select-none">
+          <h2 className="text-xl font-bold text-black ml-1 min-w-[180px] select-none">
             {headerTitle}
           </h2>
         </div>
@@ -187,7 +187,53 @@ export default function Calendar() {
             datesSet={handleDatesSet}
             height="100%"
             eventDisplay="block"
+            slotMinTime="06:00:00"
+            slotLabelFormat={{ hour: "numeric", minute: "2-digit", meridiem: "short" }}
 
+            dayHeaderContent={(arg) => {
+              const isMonth = arg.view.type === "dayGridMonth";
+
+              if (isMonth) {
+                // Month view: just the short day letter
+                return (
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    {arg.date.toLocaleDateString("en-US", { weekday: "short" })}
+                  </span>
+                );
+              }
+
+              // Week / Day view: day name + big date circle
+              const dayName = arg.date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+              const dateNum = arg.date.getDate();
+
+              return (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 0 6px", gap: 4 }}>
+                  <span style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    letterSpacing: "0.07em",
+                    color: arg.isToday ? "#2563eb" : "#6b7280",
+                  }}>
+                    {dayName}
+                  </span>
+                  <span style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 40,
+                    height: 40,
+                    borderRadius: "50%",
+                    fontSize: 22,
+                    fontWeight: arg.isToday ? 700 : 400,
+                    backgroundColor: arg.isToday ? "#2563eb" : "transparent",
+                    color: arg.isToday ? "#ffffff" : "#111827",
+                    cursor: "default",
+                  }}>
+                    {dateNum}
+                  </span>
+                </div>
+              );
+            }}
           />
         </main>
       </div>
