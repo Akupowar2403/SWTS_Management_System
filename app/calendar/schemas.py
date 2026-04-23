@@ -16,6 +16,16 @@ class EventCreate(BaseModel):
     color: Optional[str] = None
 
 
+class TaskAssign(BaseModel):
+    title: str
+    description: Optional[str] = None
+    event_date: Optional[date] = None
+    start_time: Optional[time] = None
+    end_time: Optional[time] = None
+    created_by: int
+    assigned_to: int
+
+
 class EventUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
