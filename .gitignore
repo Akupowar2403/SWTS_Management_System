@@ -4,3 +4,4 @@ __pycache__/
 .env
 .claude/
 KEY.TXT
+frontend/.env.local
