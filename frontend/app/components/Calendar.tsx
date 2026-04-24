@@ -228,6 +228,9 @@ export default function Calendar() {
           undatedEvents={undatedEvents}
           order={order}
           onOrderChange={setOrder}
+          resolveName={resolveName}
+          fmt12h={fmt12h}
+          typeBadge={TYPE_BADGE}
         />
 
         <main className="flex-1 overflow-hidden">

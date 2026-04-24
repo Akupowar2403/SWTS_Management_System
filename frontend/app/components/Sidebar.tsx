@@ -10,9 +10,12 @@ interface Props {
   undatedEvents: CalendarEvent[];
   order: "newest" | "oldest";
   onOrderChange: (order: "newest" | "oldest") => void;
+  resolveName: (id: string) => string;
+  fmt12h: (t: string) => string;
+  typeBadge: Record<string, { label: string; color: string }>;
 }
 
-export default function Sidebar({ onCreateClick, onDateSelect, undatedEvents, order, onOrderChange }: Props) {
+export default function Sidebar({ onCreateClick, onDateSelect, undatedEvents, order, onOrderChange, resolveName, fmt12h, typeBadge }: Props) {
   return (
     <aside className="w-64 shrink-0 flex flex-col border-r border-gray-200 bg-white overflow-hidden">
 
@@ -39,7 +42,7 @@ export default function Sidebar({ onCreateClick, onDateSelect, undatedEvents, or
 
       {/* Undated tasks */}
       <div className="flex-1 px-3 pb-4 min-h-0 flex flex-col overflow-hidden">
-        <TaskList events={undatedEvents} order={order} onOrderChange={onOrderChange} />
+        <TaskList events={undatedEvents} order={order} onOrderChange={onOrderChange} resolveName={resolveName} fmt12h={fmt12h} typeBadge={typeBadge} />
       </div>
     </aside>
   );
