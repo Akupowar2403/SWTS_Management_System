@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { createEvent, assignTask } from "../lib/api";
+import { useState, useEffect } from "react";
+import { createEvent, assignTask, getUsers } from "../lib/api";
 import { bus } from "../lib/bus";
 import { useAuth } from "../auth/AuthContext";
 
 interface Props {
   selectedDate?: string;
   onClose: () => void;
+}
+
+interface UserOption {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
 }
 
 export default function AddEventModal({ selectedDate, onClose }: Props) {
@@ -19,7 +26,14 @@ export default function AddEventModal({ selectedDate, onClose }: Props) {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [assignedTo, setAssignedTo] = useState("");
+  const [users, setUsers] = useState<UserOption[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (mode === "assign") {
+      getUsers().then(setUsers).catch(() => setUsers([]));
+    }
+  }, [mode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,14 +170,19 @@ export default function AddEventModal({ selectedDate, onClose }: Props) {
                 <svg className="w-4 h-4 text-[#5f6368] shrink-0" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                 </svg>
-                <input
+                <select
                   required
-                  type="text"
                   value={assignedTo}
                   onChange={(e) => setAssignedTo(e.target.value)}
-                  placeholder="Assign to (Keycloak user ID)"
                   className={inputCls}
-                />
+                >
+                  <option value="">Select a person…</option>
+                  {users.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name} ({u.username})
+                    </option>
+                  ))}
+                </select>
               </div>
             )}
           </div>

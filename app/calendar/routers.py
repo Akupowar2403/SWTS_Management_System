@@ -7,8 +7,18 @@ from app.calendar.database import get_db
 from app.calendar.models import Event
 from app.calendar.schemas import EventCreate, EventUpdate, EventResponse, TaskAssign
 from app.auth.dependencies import get_current_user, require_role
+from app.auth.keycloak import get_realm_users
 
 router = APIRouter(prefix="/events", tags=["Events"])
+users_router = APIRouter(prefix="/users", tags=["Users"])
+
+
+@users_router.get("/")
+async def list_users(user: dict = Depends(get_current_user)):
+    """Return all users in the realm — used to populate the assign-task dropdown."""
+    users = await get_realm_users()
+    # Exclude the current user from the list
+    return [u for u in users if u["id"] != user["id"]]
 
 
 @router.post("/", response_model=EventResponse, status_code=201)

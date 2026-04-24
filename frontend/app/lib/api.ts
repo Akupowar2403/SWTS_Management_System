@@ -58,6 +58,10 @@ export async function assignTask(payload: {
   });
 }
 
+export async function getUsers(): Promise<{ id: string; username: string; name: string; email: string }[]> {
+  return apiFetch(`${API_BASE}/users/`);
+}
+
 export async function deleteEvent(eventId: number): Promise<void> {
   const res = await fetch(`${API_BASE}/events/${eventId}`, { method: "DELETE" });
   if (!res.ok) throw new Error(`Delete failed ${res.status}`);
