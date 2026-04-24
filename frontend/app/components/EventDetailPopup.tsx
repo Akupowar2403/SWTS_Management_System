@@ -15,6 +15,7 @@ interface Props {
 export default function EventDetailPopup({ event, x, y, resolveName, fmt12h, typeBadge, onClose }: Props) {
   const badge = typeBadge[event.event_type] ?? { label: event.event_type, color: "#6b7280" };
   const isAssigned = !!event.assigned_to;
+  const headerColor = event.color || (isAssigned ? "#34a853" : badge.color);
   const createdDate = new Date(event.created_at).toLocaleDateString("en-US", {
     month: "short", day: "numeric", year: "numeric",
   });
@@ -28,7 +29,7 @@ export default function EventDetailPopup({ event, x, y, resolveName, fmt12h, typ
       {/* Colour bar + close */}
       <div
         className="flex items-center justify-between px-4 py-2.5"
-        style={{ backgroundColor: isAssigned ? "#34a853" : badge.color }}
+        style={{ backgroundColor: headerColor }}
       >
         <span className="text-[11px] font-semibold text-white/90 uppercase tracking-wide">
           {badge.label}

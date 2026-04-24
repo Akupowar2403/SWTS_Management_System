@@ -65,8 +65,8 @@ export default function TaskList({ events, order, onOrderChange, resolveName, fm
             onClick={(e) => handleTaskClick(e, event)}
             className="rounded px-2.5 py-2 border-l-[3px] group cursor-pointer hover:brightness-95 transition-all"
             style={{
-              borderLeftColor: event.assigned_to ? "#34a853" : "#4285f4",
-              backgroundColor: event.assigned_to ? "#f0fdf4" : "#eff6ff",
+              borderLeftColor: event.color || (event.assigned_to ? "#34a853" : "#4285f4"),
+              backgroundColor: event.color ? `${event.color}22` : (event.assigned_to ? "#f0fdf4" : "#eff6ff"),
             }}
           >
             <div className="flex items-start justify-between gap-1">

@@ -134,14 +134,17 @@ export default function Calendar() {
 
   const fcEvents = calendarEvents
     .filter((e) => e.event_date)
-    .map((e) => ({
-      id: String(e.id),
-      title: e.title,
-      start: e.start_time ? `${e.event_date}T${e.start_time}` : e.event_date!,
-      end:   e.end_time   ? `${e.event_date}T${e.end_time}`   : undefined,
-      backgroundColor: e.assigned_to ? "#34a853" : "#4285f4",
-      borderColor:     e.assigned_to ? "#34a853" : "#4285f4",
-    }));
+    .map((e) => {
+      const eventColor = e.color || (e.assigned_to ? "#34a853" : "#4285f4");
+      return {
+        id: String(e.id),
+        title: e.title,
+        start: e.start_time ? `${e.event_date}T${e.start_time}` : e.event_date!,
+        end:   e.end_time   ? `${e.event_date}T${e.end_time}`   : undefined,
+        backgroundColor: eventColor,
+        borderColor:     eventColor,
+      };
+    });
 
   const resolveName = (id: string) => {
     if (id === user?.id) return "You";

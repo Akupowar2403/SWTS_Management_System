@@ -69,6 +69,7 @@ async def assign_task(
         event_type="task",
         created_by=user["id"],
         assigned_to=payload.assigned_to,
+        color=payload.color,
     )
     db.add(event)
     db.commit()

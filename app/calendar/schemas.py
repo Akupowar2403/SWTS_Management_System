@@ -23,6 +23,7 @@ class TaskAssign(BaseModel):
     start_time: Optional[time] = None
     end_time: Optional[time] = None
     assigned_to: str                    # Keycloak UUID of the person receiving the task
+    color: Optional[str] = None
     # created_by is NOT accepted from the client — always set from the JWT token
 
 

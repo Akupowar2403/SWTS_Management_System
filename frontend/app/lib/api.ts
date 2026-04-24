@@ -50,6 +50,7 @@ export async function assignTask(payload: {
   end_time?: string;
   created_by: string;
   assigned_to: string;
+  color?: string;
 }): Promise<CalendarEvent> {
   return apiFetch(`${API_BASE}/events/assign`, {
     method: "POST",

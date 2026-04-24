@@ -17,6 +17,19 @@ interface UserOption {
   email: string;
 }
 
+const PRESET_COLORS = [
+  { hex: "#d50000", name: "Tomato" },
+  { hex: "#e67c73", name: "Flamingo" },
+  { hex: "#f4511e", name: "Tangerine" },
+  { hex: "#f6bf26", name: "Banana" },
+  { hex: "#33b679", name: "Sage" },
+  { hex: "#0b8043", name: "Basil" },
+  { hex: "#039be5", name: "Peacock" },
+  { hex: "#3f51b5", name: "Blueberry" },
+  { hex: "#8e24aa", name: "Grape" },
+  { hex: "#616161", name: "Graphite" },
+];
+
 export default function AddEventModal({ selectedDate, onClose }: Props) {
   const { user } = useAuth();
   const [mode, setMode] = useState<"add" | "assign">("add");
@@ -26,6 +39,7 @@ export default function AddEventModal({ selectedDate, onClose }: Props) {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [assignedTo, setAssignedTo] = useState("");
+  const [color, setColor] = useState<string>("");
   const [users, setUsers] = useState<UserOption[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -49,6 +63,7 @@ export default function AddEventModal({ selectedDate, onClose }: Props) {
           end_time: endTime || undefined,
           created_by: user!.id,
           assigned_to: assignedTo,
+          color: color || undefined,
         });
       } else {
         saved = await createEvent({
@@ -59,6 +74,7 @@ export default function AddEventModal({ selectedDate, onClose }: Props) {
           end_time: endTime || undefined,
           event_type: "task",
           created_by: user!.id,
+          color: color || undefined,
         });
       }
       bus.emit("task:created", saved);
@@ -163,6 +179,48 @@ export default function AddEventModal({ selectedDate, onClose }: Props) {
                 rows={2}
                 className="w-full border-0 border-b border-[#dadce0] py-1 text-sm text-[#202124] placeholder-[#bdc1c6] focus:outline-none focus:border-[#1a73e8] bg-transparent transition resize-none"
               />
+            </div>
+
+            {/* Color picker */}
+            <div className="flex items-center gap-3">
+              <svg className="w-4 h-4 text-[#5f6368] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+              </svg>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {/* No color (default) */}
+                <button
+                  type="button"
+                  title="Default"
+                  onClick={() => setColor("")}
+                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition
+                    ${color === "" ? "border-[#1a73e8]" : "border-gray-300 hover:border-gray-500"}`}
+                  style={{ background: "conic-gradient(#e5e7eb 0deg 180deg, white 180deg)" }}
+                >
+                  {color === "" && (
+                    <svg className="w-3 h-3 text-[#1a73e8]" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                  )}
+                </button>
+
+                {PRESET_COLORS.map(({ hex, name }) => (
+                  <button
+                    key={hex}
+                    type="button"
+                    title={name}
+                    onClick={() => setColor(hex)}
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition
+                      ${color === hex ? "border-gray-700 scale-110" : "border-transparent hover:scale-110"}`}
+                    style={{ backgroundColor: hex }}
+                  >
+                    {color === hex && (
+                      <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {mode === "assign" && (
