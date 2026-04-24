@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "./auth/AuthContext";
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
@@ -19,7 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${roboto.className} h-full`}>{children}</body>
+      <body className={`${roboto.className} h-full`}>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

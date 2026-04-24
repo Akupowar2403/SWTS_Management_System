@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createEvent, assignTask } from "../lib/api";
 import { bus } from "../lib/bus";
+import { useAuth } from "../auth/AuthContext";
 
 interface Props {
   selectedDate?: string;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function AddEventModal({ selectedDate, onClose }: Props) {
+  const { user } = useAuth();
   const [mode, setMode] = useState<"add" | "assign">("add");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -31,8 +33,8 @@ export default function AddEventModal({ selectedDate, onClose }: Props) {
           event_date: eventDate || undefined,
           start_time: startTime || undefined,
           end_time: endTime || undefined,
-          created_by: 1, // TODO: replace with Keycloak user id
-          assigned_to: parseInt(assignedTo),
+          created_by: user!.id,
+          assigned_to: assignedTo,
         });
       } else {
         saved = await createEvent({
@@ -42,7 +44,7 @@ export default function AddEventModal({ selectedDate, onClose }: Props) {
           start_time: startTime || undefined,
           end_time: endTime || undefined,
           event_type: "task",
-          created_by: 1, // TODO: replace with Keycloak user id
+          created_by: user!.id,
         });
       }
       bus.emit("task:created", saved);
@@ -156,10 +158,10 @@ export default function AddEventModal({ selectedDate, onClose }: Props) {
                 </svg>
                 <input
                   required
-                  type="number"
+                  type="text"
                   value={assignedTo}
                   onChange={(e) => setAssignedTo(e.target.value)}
-                  placeholder="Assign to (User ID)"
+                  placeholder="Assign to (Keycloak user ID)"
                   className={inputCls}
                 />
               </div>

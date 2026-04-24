@@ -8,10 +8,9 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { CalendarEvent } from "../types/event";
 import { getEventsByRange, getUndatedEvents } from "../lib/api";
 import { bus } from "../lib/bus";
+import { useAuth } from "../auth/AuthContext";
 import AddEventModal from "./AddEventModal";
 import Sidebar from "./Sidebar";
-
-const USER_ID = 1; // TODO: replace with Keycloak user id
 
 const VIEWS = [
   { key: "dayGridMonth", label: "Month" },
@@ -20,6 +19,7 @@ const VIEWS = [
 ];
 
 export default function Calendar() {
+  const { user, logout } = useAuth();
   const calendarRef = useRef<FullCalendar>(null);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [undatedEvents,  setUndatedEvents]  = useState<CalendarEvent[]>([]);
@@ -30,14 +30,16 @@ export default function Calendar() {
   const [currentView,  setCurrentView]  = useState("dayGridMonth");
 
   const fetchCalendarEvents = useCallback(async (start: string, end: string) => {
-    const events = await getEventsByRange(USER_ID, start, end);
+    if (!user) return;
+    const events = await getEventsByRange(user.id, start, end);
     setCalendarEvents(events);
-  }, []);
+  }, [user]);
 
   const fetchUndatedEvents = useCallback(async () => {
-    const events = await getUndatedEvents(USER_ID, order);
+    if (!user) return;
+    const events = await getUndatedEvents(user.id, order);
     setUndatedEvents(events);
-  }, [order]);
+  }, [user, order]);
 
   const refetchAll = useCallback(() => {
     fetchUndatedEvents();
@@ -159,10 +161,14 @@ export default function Calendar() {
           ))}
         </div>
 
-        {/* User avatar */}
-        <div className="w-8 h-8 rounded-full bg-blue-600 text-white text-sm font-semibold flex items-center justify-center select-none cursor-pointer">
-          U
-        </div>
+        {/* User avatar + logout */}
+        <button
+          onClick={logout}
+          title={`Signed in as ${user?.name ?? ""}\nClick to sign out`}
+          className="w-8 h-8 rounded-full bg-blue-600 text-white text-sm font-semibold flex items-center justify-center select-none cursor-pointer hover:bg-blue-700 transition"
+        >
+          {user?.name?.[0]?.toUpperCase() ?? "?"}
+        </button>
       </header>
 
       {/* ── Body ── */}

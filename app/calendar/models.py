@@ -25,8 +25,8 @@ class Event(Base):
 
     event_type = Column(SAEnum(EventType), default=EventType.general, nullable=False)
 
-    created_by = Column(Integer, nullable=False)
-    assigned_to = Column(Integer, nullable=True)
+    created_by = Column(String(36), nullable=False)   # Keycloak UUID
+    assigned_to = Column(String(36), nullable=True)   # Keycloak UUID
 
     color = Column(String(20), nullable=True)
 

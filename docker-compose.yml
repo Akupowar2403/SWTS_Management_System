@@ -1,4 +1,6 @@
 services:
+
+  # ── App database ──────────────────────────────────────────────────────────
   db:
     image: postgres:16
     container_name: swts_db
@@ -17,26 +19,60 @@ services:
       timeout: 5s
       retries: 5
 
+  # ── Keycloak identity provider (shares the app postgres) ──────────────────
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.4
+    container_name: swts_keycloak
+    restart: always
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ── FastAPI backend ───────────────────────────────────────────────────────
   api:
     build: .
     container_name: swts_api
     restart: always
     env_file:
       - .env
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080         # internal — for fetching JWKS
+      KEYCLOAK_ISSUER_URL: http://localhost:8080  # public — matches iss claim in token
+      KEYCLOAK_REALM: swts-realm
+      KEYCLOAK_CLIENT_ID: swts-app
     ports:
       - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
+      keycloak:
+        condition: service_started
     volumes:
       - ./app:/app/app
 
+  # ── Next.js frontend ──────────────────────────────────────────────────────
   frontend:
     build: ./frontend
     container_name: swts_frontend
     restart: always
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000
+      # Browser calls Keycloak via localhost (not Docker network)
+      NEXT_PUBLIC_KEYCLOAK_URL: http://localhost:8080
+      NEXT_PUBLIC_KEYCLOAK_REALM: swts-realm
+      NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: swts-app
     ports:
       - "3000:3000"
     depends_on:

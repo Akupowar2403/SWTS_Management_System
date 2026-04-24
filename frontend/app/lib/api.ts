@@ -1,15 +1,22 @@
 import { CalendarEvent } from "../types/event";
+import { keycloakToken } from "../auth/keycloak";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, options);
+  const token = keycloakToken();
+  const headers: Record<string, string> = {
+    ...(options?.headers as Record<string, string>),
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(url, { ...options, headers });
   if (!res.ok) throw new Error(`API error ${res.status}: ${res.statusText}`);
   return res.json();
 }
 
 export async function getEventsByRange(
-  userId: number,
+  userId: string,
   startDate: string,
   endDate: string
 ): Promise<CalendarEvent[]> {
@@ -19,7 +26,7 @@ export async function getEventsByRange(
 }
 
 export async function getUndatedEvents(
-  userId: number,
+  userId: string,
   order: "newest" | "oldest" = "newest"
 ): Promise<CalendarEvent[]> {
   return apiFetch(
@@ -41,8 +48,8 @@ export async function assignTask(payload: {
   event_date?: string;
   start_time?: string;
   end_time?: string;
-  created_by: number;
-  assigned_to: number;
+  created_by: string;
+  assigned_to: string;
 }): Promise<CalendarEvent> {
   return apiFetch(`${API_BASE}/events/assign`, {
     method: "POST",

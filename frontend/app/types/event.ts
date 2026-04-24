@@ -8,8 +8,8 @@ export interface CalendarEvent {
   start_time?: string;
   end_time?: string;
   event_type: EventType;
-  created_by: number;
-  assigned_to?: number;
+  created_by: string;   // Keycloak UUID
+  assigned_to?: string; // Keycloak UUID
   color?: string;
   created_at: string;
   updated_at?: string;

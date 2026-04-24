@@ -1,6 +1,6 @@
 export interface User {
-  id: number;
+  id: string;       // Keycloak sub (UUID)
   name: string;
   email: string;
-  role?: string;
+  roles: string[];
 }

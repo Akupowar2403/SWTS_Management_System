@@ -11,9 +11,9 @@ class EventCreate(BaseModel):
     start_time: Optional[time] = None
     end_time: Optional[time] = None
     event_type: EventType = EventType.general
-    created_by: int
-    assigned_to: Optional[int] = None
+    assigned_to: Optional[str] = None   # Keycloak UUID of assignee
     color: Optional[str] = None
+    # created_by is NOT accepted from the client — always set from the JWT token
 
 
 class TaskAssign(BaseModel):
@@ -22,8 +22,8 @@ class TaskAssign(BaseModel):
     event_date: Optional[date] = None
     start_time: Optional[time] = None
     end_time: Optional[time] = None
-    created_by: int
-    assigned_to: int
+    assigned_to: str                    # Keycloak UUID of the person receiving the task
+    # created_by is NOT accepted from the client — always set from the JWT token
 
 
 class EventUpdate(BaseModel):
@@ -33,7 +33,7 @@ class EventUpdate(BaseModel):
     start_time: Optional[time] = None
     end_time: Optional[time] = None
     event_type: Optional[EventType] = None
-    assigned_to: Optional[int] = None
+    assigned_to: Optional[str] = None  # Keycloak UUID
     color: Optional[str] = None
 
 
@@ -45,8 +45,8 @@ class EventResponse(BaseModel):
     start_time: Optional[time]
     end_time: Optional[time]
     event_type: EventType
-    created_by: int
-    assigned_to: Optional[int]
+    created_by: str                     # Keycloak UUID
+    assigned_to: Optional[str]          # Keycloak UUID
     color: Optional[str]
     created_at: datetime
 
