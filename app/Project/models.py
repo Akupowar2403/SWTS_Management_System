@@ -86,7 +86,11 @@ class Project(Base):
     project_name = Column(String(255), nullable=False)
 
     client_id = Column(Integer, ForeignKey("clients.id"), nullable=True)
+    client_name = Column(String(255), nullable=True)       # free-text override (e.g. new/unnamed client)
+
     developer_id = Column(Integer, ForeignKey("developers.id"), nullable=True)
+    developer_name = Column(String(255), nullable=True)    # free-text override (e.g. freelancer)
+
     status_id = Column(Integer, ForeignKey("project_statuses.id"), nullable=True)
 
     company_name = Column(SAEnum(CompanyName), nullable=True)

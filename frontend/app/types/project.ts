@@ -37,7 +37,9 @@ export interface Project {
   id: number;
   project_name: string;
   client_id?: number;
+  client_name?: string;
   developer_id?: number;
+  developer_name?: string;
   status_id?: number;
   company_name?: CompanyName;
   profit_type: ProfitType;

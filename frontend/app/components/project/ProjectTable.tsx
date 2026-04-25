@@ -29,9 +29,11 @@ export default function ProjectTable() {
   useEffect(() => {
     const sync = (p: Project) =>
       setProjects((prev) => prev.map((x) => (x.id === p.id ? p : x)));
+    bus.on("project:updated",        sync);
     bus.on("project:status-changed", sync);
     bus.on("project:ppp-toggled",    sync);
     return () => {
+      bus.off("project:updated",        sync);
       bus.off("project:status-changed", sync);
       bus.off("project:ppp-toggled",    sync);
     };
@@ -115,10 +117,10 @@ export default function ProjectTable() {
               </td>
 
               {/* Client */}
-              <td className="px-4 py-3 text-gray-700">{p.client?.name ?? "—"}</td>
+              <td className="px-4 py-3 text-gray-700">{p.client_name ?? p.client?.name ?? "—"}</td>
 
               {/* Developer */}
-              <td className="px-4 py-3 text-gray-700">{p.developer?.name ?? "—"}</td>
+              <td className="px-4 py-3 text-gray-700">{p.developer_name ?? p.developer?.name ?? "—"}</td>
 
               {/* Status — dropdown */}
               <td className="px-4 py-3">

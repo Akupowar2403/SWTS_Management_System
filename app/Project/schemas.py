@@ -85,7 +85,9 @@ class DeveloperResponse(BaseModel):
 class ProjectCreate(BaseModel):
     project_name: str
     client_id: Optional[int] = None
+    client_name: Optional[str] = None
     developer_id: Optional[int] = None
+    developer_name: Optional[str] = None
     status_id: Optional[int] = None
     company_name: Optional[CompanyName] = None
     profit_type: ProfitType = ProfitType.percentage
@@ -100,7 +102,9 @@ class ProjectCreate(BaseModel):
 class ProjectUpdate(BaseModel):
     project_name: Optional[str] = None
     client_id: Optional[int] = None
+    client_name: Optional[str] = None
     developer_id: Optional[int] = None
+    developer_name: Optional[str] = None
     status_id: Optional[int] = None
     company_name: Optional[CompanyName] = None
     profit_type: Optional[ProfitType] = None
@@ -117,7 +121,9 @@ class ProjectResponse(BaseModel):
     id: int
     project_name: str
     client_id: Optional[int]
+    client_name: Optional[str]
     developer_id: Optional[int]
+    developer_name: Optional[str]
     status_id: Optional[int]
     company_name: Optional[CompanyName]
     profit_type: ProfitType

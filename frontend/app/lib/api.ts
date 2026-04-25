@@ -1,5 +1,5 @@
 import { CalendarEvent } from "../types/event";
-import { Project, ProjectStatus } from "../types/project";
+import { Project, ProjectStatus, Client, Developer } from "../types/project";
 import { keycloakToken } from "../auth/keycloak";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -75,8 +75,33 @@ export async function getProjectStatuses(): Promise<ProjectStatus[]> {
   return apiFetch(`${API_BASE}/projects/statuses`);
 }
 
+export async function getClients(search?: string): Promise<Client[]> {
+  const q = search ? `?search=${encodeURIComponent(search)}` : "";
+  return apiFetch(`${API_BASE}/projects/clients${q}`);
+}
+
+export async function getDevelopers(search?: string): Promise<Developer[]> {
+  const q = search ? `?search=${encodeURIComponent(search)}` : "";
+  return apiFetch(`${API_BASE}/projects/developers${q}`);
+}
+
 export async function getProjects(): Promise<Project[]> {
   return apiFetch(`${API_BASE}/projects/`);
+}
+
+export async function getProject(projectId: number): Promise<Project> {
+  return apiFetch(`${API_BASE}/projects/${projectId}`);
+}
+
+export async function updateProject(
+  projectId: number,
+  payload: Partial<Pick<Project, "project_name" | "client_id" | "developer_id" | "status_id" | "deadline" | "description" | "start_date" | "timeline_days" | "company_name" | "profit_type" | "company_profit_value" | "developer_profit_value">>
+): Promise<Project> {
+  return apiFetch(`${API_BASE}/projects/${projectId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function updateProjectStatus(
