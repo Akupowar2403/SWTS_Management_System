@@ -1,4 +1,5 @@
 import { CalendarEvent } from "../types/event";
+import { Project, ProjectStatus } from "../types/project";
 import { keycloakToken } from "../auth/keycloak";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -66,4 +67,31 @@ export async function getUsers(): Promise<{ id: string; username: string; name: 
 export async function deleteEvent(eventId: number): Promise<void> {
   const res = await fetch(`${API_BASE}/events/${eventId}`, { method: "DELETE" });
   if (!res.ok) throw new Error(`Delete failed ${res.status}`);
+}
+
+// ── Projects ──────────────────────────────────────────────────────────────────
+
+export async function getProjectStatuses(): Promise<ProjectStatus[]> {
+  return apiFetch(`${API_BASE}/projects/statuses`);
+}
+
+export async function getProjects(): Promise<Project[]> {
+  return apiFetch(`${API_BASE}/projects/`);
+}
+
+export async function updateProjectStatus(
+  projectId: number,
+  statusId: number
+): Promise<Project> {
+  return apiFetch(`${API_BASE}/projects/${projectId}/status`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status_id: statusId }),
+  });
+}
+
+export async function toggleProjectPPP(projectId: number): Promise<Project> {
+  return apiFetch(`${API_BASE}/projects/${projectId}/toggle-ppp`, {
+    method: "PATCH",
+  });
 }

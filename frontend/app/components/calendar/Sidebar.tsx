@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarEvent } from "../types/event";
+import { CalendarEvent } from "../../types/event";
 import MiniCalendar from "./MiniCalendar";
 import TaskList from "./TaskList";
 

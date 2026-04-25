@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { CalendarEvent } from "../types/event";
-import { getEventsByRange, getUndatedEvents, getUsers } from "../lib/api";
-import { bus } from "../lib/bus";
-import { useAuth } from "../auth/AuthContext";
+import { CalendarEvent } from "../../types/event";
+import { getEventsByRange, getUndatedEvents, getUsers } from "../../lib/api";
+import { bus } from "../../lib/bus";
+import { useAuth } from "../../auth/AuthContext";
 import AddEventModal from "./AddEventModal";
 import Sidebar from "./Sidebar";
 import EventDetailPopup from "./EventDetailPopup";
@@ -32,8 +34,14 @@ interface ClickPopup {
   y: number;
 }
 
+const NAV = [
+  { label: "Calendar", href: "/" },
+  { label: "Projects", href: "/projects" },
+];
+
 export default function Calendar() {
   const { user, logout } = useAuth();
+  const pathname = usePathname();
   const calendarRef = useRef<FullCalendar>(null);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [undatedEvents,  setUndatedEvents]  = useState<CalendarEvent[]>([]);
@@ -162,14 +170,29 @@ export default function Calendar() {
 
       {/* ── Header ── */}
       <header className="h-16 shrink-0 flex items-center px-4 gap-4 border-b border-gray-200">
-        <div className="w-64 shrink-0 flex items-center gap-2">
-          <button className="p-2 rounded-full hover:bg-gray-100 text-gray-600">
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-            </svg>
-          </button>
+        <div className="w-48 shrink-0 flex items-center gap-2">
           <span className="text-xl font-semibold text-gray-900 tracking-wide select-none">SWTS</span>
         </div>
+
+        {/* Nav links */}
+        <nav className="flex items-center gap-1">
+          {NAV.map(({ label, href }) => {
+            const active = pathname === href;
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`px-4 py-1.5 rounded text-sm font-medium transition ${
+                  active
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                }`}
+              >
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
 
         <div className="flex items-center gap-1">
           <button

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CalendarEvent } from "../types/event";
-import { deleteEvent } from "../lib/api";
-import { bus } from "../lib/bus";
+import { CalendarEvent } from "../../types/event";
+import { deleteEvent } from "../../lib/api";
+import { bus } from "../../lib/bus";
 import EventDetailPopup from "./EventDetailPopup";
 
 interface Popup { event: CalendarEvent; x: number; y: number; }

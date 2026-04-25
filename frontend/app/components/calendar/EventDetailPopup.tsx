@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarEvent } from "../types/event";
+import { CalendarEvent } from "../../types/event";
 
 interface Props {
   event: CalendarEvent;

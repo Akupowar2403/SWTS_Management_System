@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createEvent, assignTask, getUsers } from "../lib/api";
-import { bus } from "../lib/bus";
-import { useAuth } from "../auth/AuthContext";
+import { createEvent, assignTask, getUsers } from "../../lib/api";
+import { bus } from "../../lib/bus";
+import { useAuth } from "../../auth/AuthContext";
 
 interface Props {
   selectedDate?: string;

@@ -1,0 +1,48 @@
+Projects: There will be a table with Columns: ID, Project name, Client name, Developer name,
+Project status, dead line, and profit.
+ 1. In the main table there is should be an option to change the status of the project. (Option
+to edit from admin panel: status name, status color).
+ 2. In the profit column, show one toggle switch named “Show PPP” to show the project wise
+profit. By default it will be NA in all rows.
+ 3. When we click on “Project name” cell of any projects then it will direct us to the
+information related to that project.
+
+Add New Project Button:
+ 1. There should be button to add a new project named “New Project”.
+ 2. When we click on “New project”, it will direct us to a new page.
+ 3. Add project information:
+A. Id (Automatically generated),
+B. Project name
+C. Client name (drop down will be there in which by default “New client” and a search box
+should appear above it and below “New client” there will be 5 names of existing clients in
+alphabetical manner and option to scroll)
+D. Click on “New client”: name (mandatory), contact no (mandatory), email address
+(mandatory), type (individual, enterprise) (mandatory), Citizenship of Client (Indian or
+Foreign) (mandatory), residential address, description.
+E. Lead source (Up work, LinkedIn, freelancer, fiverr, Facebook, Instagram, company website),
+(Option to add source in the admin panel).
+F. Company name (swts or swts Pvt. Ltd.),
+G. developer name (drop down will be there in which by default “New Developer” and a search
+box should appear above it and below “New Developer” there will be 5 names of existing
+developers in alphabetical manner and option to scroll)
+H. Click on “New Developer”: name (mandatory), contact no (mandatory), email address
+(mandatory), type (individual, enterprise) (mandatory), residential address (mandatory), 
+description (mandatory), profit sharing percentage: default values (mandatory), TDS (%)
+(Mandatory), Description.
+I. profit sharing percentage (There will be 2 boxes to enter the value (company’s percentage,
+developer’s percentage)) (option to change between percentage and amount)
+J. project status (default will be “In Touch”)
+K. Start Time (Default today’s date),
+L. Project timeline (no of days to complete the project),
+M. End time (Auto calculate),
+N. Description.
+
+Click on existing project name from the list:
+Information to be shown once we click on any existing project:
+1. Project name
+2. Client name
+3. Developer name
+4. Status
+5. Dead line
+Tip: Any time we should be able to edit above information.
+Below above info we want different Tabs like 
