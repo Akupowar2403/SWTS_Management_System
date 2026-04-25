@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./auth/AuthContext";
+import AppHeader from "./components/AppHeader";
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
@@ -20,8 +21,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${roboto.className} h-full`}>
-        <AuthProvider>{children}</AuthProvider>
+      <body className={`${roboto.className} h-full flex flex-col`}>
+        <AuthProvider>
+          <AppHeader />
+          <div className="flex-1 overflow-hidden">
+            {children}
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

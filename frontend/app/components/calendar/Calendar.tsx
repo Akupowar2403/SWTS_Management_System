@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -34,14 +32,8 @@ interface ClickPopup {
   y: number;
 }
 
-const NAV = [
-  { label: "Calendar", href: "/" },
-  { label: "Projects", href: "/projects" },
-];
-
 export default function Calendar() {
-  const { user, logout } = useAuth();
-  const pathname = usePathname();
+  const { user } = useAuth();
   const calendarRef = useRef<FullCalendar>(null);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [undatedEvents,  setUndatedEvents]  = useState<CalendarEvent[]>([]);
@@ -166,34 +158,10 @@ export default function Calendar() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-white overflow-hidden">
+    <div className="h-full flex flex-col bg-white overflow-hidden">
 
-      {/* ── Header ── */}
-      <header className="h-16 shrink-0 flex items-center px-4 gap-4 border-b border-gray-200">
-        <div className="w-48 shrink-0 flex items-center gap-2">
-          <span className="text-xl font-semibold text-gray-900 tracking-wide select-none">SWTS</span>
-        </div>
-
-        {/* Nav links */}
-        <nav className="flex items-center gap-1">
-          {NAV.map(({ label, href }) => {
-            const active = pathname === href;
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`px-4 py-1.5 rounded text-sm font-medium transition ${
-                  active
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                }`}
-              >
-                {label}
-              </Link>
-            );
-          })}
-        </nav>
-
+      {/* ── Calendar toolbar ── */}
+      <div className="h-14 shrink-0 flex items-center px-4 gap-4 border-b border-gray-200">
         <div className="flex items-center gap-1">
           <button
             onClick={() => calendarRef.current?.getApi().today()}
@@ -236,15 +204,7 @@ export default function Calendar() {
             </button>
           ))}
         </div>
-
-        <button
-          onClick={logout}
-          title={`Signed in as ${user?.name ?? ""}\nClick to sign out`}
-          className="w-8 h-8 rounded-full bg-blue-600 text-white text-sm font-semibold flex items-center justify-center select-none cursor-pointer hover:bg-blue-700 transition"
-        >
-          {user?.name?.[0]?.toUpperCase() ?? "?"}
-        </button>
-      </header>
+      </div>
 
       {/* ── Body ── */}
       <div className="flex flex-1 overflow-hidden">
