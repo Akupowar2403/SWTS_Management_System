@@ -4,6 +4,11 @@ export type ClientType  = "individual" | "enterprise";
 export type Citizenship = "Indian" | "Foreign";
 export type DeveloperType = "individual" | "enterprise";
 
+export interface LeadSource {
+  id: number;
+  name: string;
+}
+
 export interface ProjectStatus {
   id: number;
   name: string;
@@ -40,6 +45,7 @@ export interface Project {
   client_name?: string;
   developer_id?: number;
   developer_name?: string;
+  lead_source_id?: number;
   status_id?: number;
   company_name?: CompanyName;
   profit_type: ProfitType;
@@ -55,4 +61,5 @@ export interface Project {
   client?: Client;
   developer?: Developer;
   status?: ProjectStatus;
+  lead_source?: LeadSource;
 }

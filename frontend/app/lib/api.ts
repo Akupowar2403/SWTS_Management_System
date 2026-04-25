@@ -1,5 +1,5 @@
 import { CalendarEvent } from "../types/event";
-import { Project, ProjectStatus, Client, Developer } from "../types/project";
+import { Project, ProjectStatus, Client, Developer, LeadSource } from "../types/project";
 import { keycloakToken } from "../auth/keycloak";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -95,7 +95,7 @@ export async function getProject(projectId: number): Promise<Project> {
 
 export async function updateProject(
   projectId: number,
-  payload: Partial<Pick<Project, "project_name" | "client_id" | "developer_id" | "status_id" | "deadline" | "description" | "start_date" | "timeline_days" | "company_name" | "profit_type" | "company_profit_value" | "developer_profit_value">>
+  payload: Partial<Pick<Project, "project_name" | "client_id" | "client_name" | "developer_id" | "developer_name" | "status_id" | "deadline" | "description" | "start_date" | "timeline_days" | "company_name" | "profit_type" | "company_profit_value" | "developer_profit_value">>
 ): Promise<Project> {
   return apiFetch(`${API_BASE}/projects/${projectId}`, {
     method: "PATCH",
@@ -118,5 +118,72 @@ export async function updateProjectStatus(
 export async function toggleProjectPPP(projectId: number): Promise<Project> {
   return apiFetch(`${API_BASE}/projects/${projectId}/toggle-ppp`, {
     method: "PATCH",
+  });
+}
+
+export async function getLeadSources(): Promise<LeadSource[]> {
+  return apiFetch(`${API_BASE}/projects/lead-sources`);
+}
+
+export interface NewClientPayload {
+  name: string;
+  contact_no: string;
+  email: string;
+  type: "individual" | "enterprise";
+  citizenship: "Indian" | "Foreign";
+  residential_address?: string;
+  description?: string;
+}
+
+export async function createClient(payload: NewClientPayload): Promise<Client> {
+  return apiFetch(`${API_BASE}/projects/clients`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export interface NewDeveloperPayload {
+  name: string;
+  contact_no: string;
+  email: string;
+  type: "individual" | "enterprise";
+  residential_address: string;
+  description: string;
+  default_profit_sharing_percentage?: number;
+  tds_percentage?: number;
+}
+
+export async function createDeveloper(payload: NewDeveloperPayload): Promise<Developer> {
+  return apiFetch(`${API_BASE}/projects/developers`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export interface NewProjectPayload {
+  project_name: string;
+  client_id?: number;
+  client_name?: string;
+  developer_id?: number;
+  developer_name?: string;
+  lead_source_id?: number;
+  status_id?: number;
+  company_name?: "SWTS" | "SWTS Pvt. Ltd.";
+  profit_type?: "percentage" | "amount";
+  company_profit_value?: number;
+  developer_profit_value?: number;
+  start_date?: string;
+  timeline_days?: number;
+  deadline?: string;
+  description?: string;
+}
+
+export async function createProject(payload: NewProjectPayload): Promise<Project> {
+  return apiFetch(`${API_BASE}/projects/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
   });
 }

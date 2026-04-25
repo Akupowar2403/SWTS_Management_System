@@ -1,17 +1,28 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from datetime import timedelta, date as date_type
 
 from app.calendar.database import get_db
-from app.Project.models import Project, ProjectStatus, Client, Developer
+from app.Project.models import Project, ProjectStatus, Client, Developer, LeadSource
 from app.Project.schemas import (
-    ProjectResponse, ProjectUpdate,
+    ProjectCreate, ProjectResponse, ProjectUpdate,
     ProjectStatusUpdate, ProjectStatusResponse,
-    ClientResponse, DeveloperResponse,
+    ClientCreate, ClientResponse,
+    DeveloperCreate, DeveloperResponse,
+    LeadSourceResponse,
 )
 from app.auth.dependencies import get_current_user
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
+
+
+@router.get("/lead-sources", response_model=List[LeadSourceResponse])
+async def list_lead_sources(
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
+    return db.query(LeadSource).order_by(LeadSource.name).all()
 
 
 @router.get("/clients", response_model=List[ClientResponse])
@@ -38,12 +49,70 @@ async def list_developers(
     return query.order_by(Developer.name).limit(50).all()
 
 
+@router.post("/clients", response_model=ClientResponse, status_code=201)
+async def create_client(
+    payload: ClientCreate,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
+    client = Client(**payload.model_dump())
+    db.add(client)
+    db.commit()
+    db.refresh(client)
+    return client
+
+
+@router.post("/developers", response_model=DeveloperResponse, status_code=201)
+async def create_developer(
+    payload: DeveloperCreate,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
+    developer = Developer(**payload.model_dump())
+    db.add(developer)
+    db.commit()
+    db.refresh(developer)
+    return developer
+
+
 @router.get("/statuses", response_model=List[ProjectStatusResponse])
 async def list_statuses(
     db: Session = Depends(get_db),
     user: dict = Depends(get_current_user),
 ):
     return db.query(ProjectStatus).order_by(ProjectStatus.name).all()
+
+
+@router.post("/", response_model=ProjectResponse, status_code=201)
+async def create_project(
+    payload: ProjectCreate,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
+    data = payload.model_dump()
+
+    # auto-set start_date to today if not provided
+    if not data.get("start_date"):
+        data["start_date"] = date_type.today()
+
+    # auto-calculate deadline from start_date + timeline_days
+    if data.get("start_date") and data.get("timeline_days") and not data.get("deadline"):
+        data["deadline"] = data["start_date"] + timedelta(days=data["timeline_days"])
+
+    # set default status to "In Touch" if not provided
+    if not data.get("status_id"):
+        default_status = db.query(ProjectStatus).filter(
+            ProjectStatus.name.ilike("in touch")
+        ).first()
+        if default_status:
+            data["status_id"] = default_status.id
+
+    data["created_by"] = user["id"]
+    project = Project(**data)
+    db.add(project)
+    db.commit()
+    db.refresh(project)
+    return project
 
 
 @router.get("/", response_model=List[ProjectResponse])

@@ -4,6 +4,20 @@ from datetime import date, datetime
 from app.Project.models import ClientType, Citizenship, DeveloperType, ProfitType, CompanyName
 
 
+# ── LeadSource ────────────────────────────────────────────────────────────────
+
+class LeadSourceCreate(BaseModel):
+    name: str
+
+
+class LeadSourceResponse(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
 # ── ProjectStatus ─────────────────────────────────────────────────────────────
 
 class ProjectStatusCreate(BaseModel):
@@ -88,6 +102,7 @@ class ProjectCreate(BaseModel):
     client_name: Optional[str] = None
     developer_id: Optional[int] = None
     developer_name: Optional[str] = None
+    lead_source_id: Optional[int] = None
     status_id: Optional[int] = None
     company_name: Optional[CompanyName] = None
     profit_type: ProfitType = ProfitType.percentage
@@ -105,6 +120,7 @@ class ProjectUpdate(BaseModel):
     client_name: Optional[str] = None
     developer_id: Optional[int] = None
     developer_name: Optional[str] = None
+    lead_source_id: Optional[int] = None
     status_id: Optional[int] = None
     company_name: Optional[CompanyName] = None
     profit_type: Optional[ProfitType] = None
@@ -124,6 +140,7 @@ class ProjectResponse(BaseModel):
     client_name: Optional[str]
     developer_id: Optional[int]
     developer_name: Optional[str]
+    lead_source_id: Optional[int]
     status_id: Optional[int]
     company_name: Optional[CompanyName]
     profit_type: ProfitType
@@ -137,10 +154,11 @@ class ProjectResponse(BaseModel):
     created_by: str
     created_at: datetime
 
-    # nested for table display
+    # nested for display
     client: Optional[ClientResponse] = None
     developer: Optional[DeveloperResponse] = None
     status: Optional[ProjectStatusResponse] = None
+    lead_source: Optional[LeadSourceResponse] = None
 
     class Config:
         from_attributes = True

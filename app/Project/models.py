@@ -34,6 +34,15 @@ class CompanyName(str, enum.Enum):
     swts_pvt_ltd = "SWTS Pvt. Ltd."
 
 
+class LeadSource(Base):
+    __tablename__ = "lead_sources"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False, unique=True)
+
+    projects = relationship("Project", back_populates="lead_source")
+
+
 class ProjectStatus(Base):
     __tablename__ = "project_statuses"
 
@@ -91,6 +100,7 @@ class Project(Base):
     developer_id = Column(Integer, ForeignKey("developers.id"), nullable=True)
     developer_name = Column(String(255), nullable=True)    # free-text override (e.g. freelancer)
 
+    lead_source_id = Column(Integer, ForeignKey("lead_sources.id"), nullable=True)
     status_id = Column(Integer, ForeignKey("project_statuses.id"), nullable=True)
 
     company_name = Column(SAEnum(CompanyName), nullable=True)
@@ -113,3 +123,4 @@ class Project(Base):
     client = relationship("Client", back_populates="projects")
     developer = relationship("Developer", back_populates="projects")
     status = relationship("ProjectStatus", back_populates="projects")
+    lead_source = relationship("LeadSource", back_populates="projects")
