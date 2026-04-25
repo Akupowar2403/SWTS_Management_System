@@ -46,3 +46,20 @@ Information to be shown once we click on any existing project:
 5. Dead line
 Tip: Any time we should be able to edit above information.
 Below above info we want different Tabs like 
+
+Access to fetch at 'http://localhost:8000/projects/' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+:8000/projects/:1  Failed to load resource: net::ERR_FAILEDUnderstand this error
+Unable to add filesystem: <illegal path>
+Access to fetch at 'http://localhost:8000/projects/' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+api.ts:14  POST http://localhost:8000/projects/ net::ERR_FAILED 500 (Internal Server Error)
+apiFetch @ api.ts:14
+createProject @ api.ts:184
+(anonymous) @ NewProjectForm.tsx:422
+executeDispatch @ react-dom-client.development.js:20610
+runWithFiberInDEV @ react-dom-client.development.js:986
+processDispatchQueue @ react-dom-client.development.js:20660
+(anonymous) @ react-dom-client.development.js:21234
+batchedUpdates$1 @ react-dom-client.development.js:3377
+dispatchEventForPluginEventSystem @ react-dom-client.development.js:20814
+dispatchEvent @ react-dom-client.development.js:25817
+dispatchDiscreteEvent @ react-dom-client.development.js:25785Understand this error

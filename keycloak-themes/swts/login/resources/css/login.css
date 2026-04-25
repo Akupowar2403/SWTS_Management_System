@@ -1,0 +1,463 @@
+/* ── SWTS Custom Keycloak Login Theme ── */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --blue-50:  #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-800: #1e40af;
+  --slate-50:  #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-900: #0f172a;
+
+  --pf-global--primary-color--100: var(--blue-600);
+  --pf-global--primary-color--200: var(--blue-700);
+  --pf-global--link--Color:        var(--blue-600);
+  --pf-global--link--Color--hover: var(--blue-700);
+  --pf-global--active-color--100:  var(--blue-600);
+  --pf-global--BorderColor--200:   var(--blue-600);
+  --pf-global--FontFamily--sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ── Page background ── */
+.login-pf {
+  background: none;
+}
+
+.login-pf body {
+  background:
+    radial-gradient(ellipse 90% 50% at 50% -5%, rgba(37,99,235,0.07) 0%, transparent 55%),
+    #f5f7ff;
+  background-attachment: fixed;
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.login-pf .container {
+  padding-top: 48px;
+}
+
+/* ── Logo ── */
+div.kc-logo-text {
+  background-image: none;
+  height: auto;
+  width: auto;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* ── Header ── */
+#kc-header {
+  text-align: center;
+  overflow: visible;
+}
+
+#kc-header-wrapper {
+  padding: 28px 10px 0;
+  text-align: center;
+  font-size: 0;
+  line-height: 1;
+}
+
+/* SWTS logo — targets the span Keycloak 26 renders directly in #kc-header-wrapper */
+#kc-header-wrapper span,
+div.kc-logo-text span {
+  display: inline-block;
+  font-size: 5.2rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 40%, #2563eb 70%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 6px 20px rgba(37,99,235,0.35));
+  line-height: 1;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tagline */
+#kc-header-wrapper::after {
+  content: "Project Management System";
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--slate-400);
+  margin-top: 10px;
+  line-height: 1.4;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Card ── */
+.card-pf {
+  margin: 0 auto;
+  padding: 0 32px 28px;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid rgba(37,99,235,0.10);
+  box-shadow:
+    0 0 0 1px rgba(37,99,235,0.03),
+    0 2px 6px rgba(37,99,235,0.04),
+    0 12px 40px rgba(37,99,235,0.09),
+    0 24px 56px rgba(0,0,0,0.04);
+}
+
+/* ── Page title ── */
+h1#kc-page-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--slate-700);
+  letter-spacing: -0.005em;
+  margin-top: 18px;
+  margin-bottom: 2px;
+  font-family: 'Inter', sans-serif;
+}
+
+.login-pf-header {
+  border-bottom: 1px solid var(--slate-100);
+  padding-bottom: 12px;
+  margin-bottom: 2px;
+}
+
+/* ── Labels ── */
+.pf-c-form__label-text {
+  font-weight: 500;
+  color: var(--slate-600);
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Inputs ── */
+.pf-c-form-control {
+  border-radius: 10px !important;
+  border: 1.5px solid var(--slate-200) !important;
+  height: 42px;
+  font-size: 0.875rem;
+  padding: 0 14px;
+  background: var(--slate-50) !important;
+  color: var(--slate-900);
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.pf-c-form-control:focus {
+  border-color: var(--blue-600) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.08) !important;
+  outline: none;
+}
+
+.pf-c-form-control::placeholder {
+  color: var(--slate-300);
+  font-size: 0.84rem;
+}
+
+/* ── Form content ── */
+#kc-content-wrapper {
+  margin-top: 16px;
+}
+
+/* ── Primary button ── */
+.btn-primary,
+.pf-c-button.pf-m-primary {
+  background: linear-gradient(135deg, var(--blue-600) 0%, var(--blue-700) 100%) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  height: 42px;
+  font-size: 0.875rem;
+  letter-spacing: 0.015em;
+  font-family: 'Inter', sans-serif;
+  box-shadow:
+    0 1px 3px rgba(37,99,235,0.18),
+    0 4px 14px rgba(37,99,235,0.28);
+  transition: box-shadow 0.15s, transform 0.1s;
+}
+
+.btn-primary:hover,
+.pf-c-button.pf-m-primary:hover {
+  background: linear-gradient(135deg, var(--blue-700) 0%, var(--blue-800) 100%) !important;
+  box-shadow:
+    0 2px 6px rgba(37,99,235,0.2),
+    0 8px 22px rgba(37,99,235,0.36);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active,
+.pf-c-button.pf-m-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(37,99,235,0.22);
+}
+
+/* ── Links ── */
+a {
+  color: var(--blue-600);
+  font-weight: 500;
+}
+
+a:hover,
+.login-pf a:hover {
+  color: var(--blue-700);
+}
+
+/* ── Remember me ── */
+.pf-c-check__label {
+  font-size: 0.78rem;
+  color: var(--slate-500);
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── "Or sign in with" divider ── */
+#kc-social-providers {
+  margin-top: 18px;
+}
+
+#kc-social-providers h2 {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 0.62rem !important;
+  font-weight: 500 !important;
+  color: var(--slate-400) !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  margin: 0 0 12px !important;
+  padding: 0 !important;
+  font-family: 'Inter', sans-serif !important;
+  line-height: 1 !important;
+}
+
+#kc-social-providers h2::before,
+#kc-social-providers h2::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--slate-200);
+}
+
+/* ── Google social button ── */
+#kc-social-providers .kc-social-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#kc-social-providers .kc-social-links li {
+  list-style: none;
+}
+
+a#social-google,
+a[id^="social-"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  border-radius: 10px !important;
+  border: 1.5px solid var(--slate-200) !important;
+  background: #ffffff !important;
+  color: var(--slate-700) !important;
+  font-size: 0.84rem !important;
+  font-weight: 500 !important;
+  height: 42px !important;
+  padding: 0 16px !important;
+  text-decoration: none !important;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s !important;
+  font-family: 'Inter', sans-serif !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+}
+
+a#social-google:hover,
+a[id^="social-"]:hover {
+  border-color: var(--blue-600) !important;
+  background: var(--blue-50) !important;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.12) !important;
+  color: var(--blue-700) !important;
+}
+
+/* Replace Font Awesome google icon with real Google logo */
+a#social-google i.fa-google {
+  font-size: 0 !important;
+  width: 18px;
+  height: 18px;
+  background-image: url('../img/google-logo.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+a#social-google i.fa-google::before {
+  content: '' !important;
+}
+
+.kc-social-provider-name {
+  font-size: 0.84rem;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Error / alert ── */
+.pf-c-alert.pf-m-danger {
+  border-radius: 10px;
+  margin-bottom: 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-left: 3px solid #f87171;
+}
+
+.pf-c-alert__title {
+  font-size: var(--pf-global--FontSize--xs);
+  font-weight: 500;
+}
+
+/* ── Bottom info strip ── */
+#kc-info {
+  margin: 20px -32px -28px;
+}
+
+#kc-info-wrapper {
+  font-size: 0.76rem;
+  padding: 12px 32px;
+  background: var(--slate-50);
+  border-radius: 0 0 15px 15px;
+  border-top: 1px solid var(--slate-100);
+  color: var(--slate-500);
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+}
+
+.login-pf-page .login-pf-signup {
+  font-size: 0.76rem;
+  color: var(--slate-500);
+}
+
+/* ── Form buttons ── */
+#kc-form-buttons {
+  margin-top: 20px;
+}
+
+/* ── Locale dropdown ── */
+#kc-locale ul {
+  background-color: #ffffff;
+  display: none;
+  top: 20px;
+  min-width: 110px;
+  padding: 4px;
+  border: 1px solid var(--slate-200);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+#kc-locale-dropdown { display: inline-block; }
+#kc-locale-dropdown:hover ul { display: block; }
+
+#kc-locale-dropdown a,
+#kc-locale-dropdown button {
+  color: var(--slate-500);
+  font-size: 0.78rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+
+button#kc-current-locale-link::after {
+  content: "\2c5";
+  margin-left: var(--pf-global--spacer--xs);
+}
+
+/* ── Misc ── */
+textarea.pf-c-form-control { height: auto; }
+.required { color: #ef4444; }
+p.instruction { margin: 5px 0; font-size: 0.8rem; color: var(--slate-500); }
+.pf-c-button.pf-m-control { border-color: var(--slate-200); }
+#kc-form-options span { display: block; }
+#kc-form-options .checkbox { margin-top: 0; color: var(--slate-500); }
+#kc-terms-text { margin-bottom: 20px; }
+#kc-registration { margin-bottom: 0; }
+#kc-back { margin-top: 5px; }
+.no-bottom-margin { margin-bottom: 0; }
+#kc-content { width: 100%; }
+#kc-content-wrapper .row { margin-left: 0; margin-right: 0; }
+.login-pf-page .btn-primary { margin-top: 0; }
+.card-pf form.form-actions .btn { float: right; margin-left: 10px; }
+.login-pf-page .login-pf-brand { margin-top: 20px; max-width: 360px; width: 40%; }
+.login-pf-page .login-pf-signup { font-size: 0.76rem; }
+
+/* ── Tooltip ── */
+.kc-login-tooltip { position: relative; display: inline-block; }
+.kc-login-tooltip .kc-tooltip-text {
+  top: -3px; left: 160%;
+  background-color: var(--slate-900);
+  visibility: hidden; color: #fff;
+  min-width: 130px; text-align: center;
+  border-radius: 8px; padding: 6px 10px;
+  position: absolute; opacity: 0;
+  font-size: 0.72rem;
+  font-family: 'Inter', sans-serif;
+  transition: opacity 0.3s;
+}
+.kc-login-tooltip:hover .kc-tooltip-text { visibility: visible; opacity: 0.9; }
+.kc-login-tooltip .kc-tooltip-text::after {
+  content: " "; position: absolute;
+  top: 50%; right: 100%; margin-top: -5px;
+  border: 5px solid transparent;
+  border-right-color: var(--slate-900);
+}
+
+/* ── Responsive ── */
+@media (max-width: 767px) {
+  .login-pf body {
+    background: #f0f5ff;
+  }
+
+  .login-pf .container {
+    padding-top: 20px;
+  }
+
+  .login-pf-page .card-pf {
+    max-width: none;
+    border-radius: 0;
+    box-shadow: 0 2px 12px rgba(37,99,235,0.07);
+    padding: 0 20px 24px;
+  }
+
+  div.kc-logo-text span {
+    font-size: 1.5rem;
+  }
+
+  #kc-info {
+    margin: 20px -20px -24px;
+  }
+
+  #kc-info-wrapper {
+    padding: 12px 20px;
+    border-radius: 0;
+  }
+}
+
+@media (min-width: 768px) {
+  #kc-container-wrapper { position: absolute; width: 100%; }
+  .login-pf .container { padding-right: 80px; }
+  #kc-locale { position: relative; text-align: right; z-index: 9999; }
+}
+
+@media (min-height: 646px) { #kc-container-wrapper { bottom: 12%; } }
+@media (max-height: 645px) { #kc-container-wrapper { padding-top: 50px; top: 20%; } }
