@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 from typing import Optional
 from datetime import date, datetime
 from app.Project.models import ClientType, Citizenship, DeveloperType, ProfitType, CompanyName
@@ -113,6 +113,15 @@ class ProjectCreate(BaseModel):
     deadline: Optional[date] = None
     description: Optional[str] = None
 
+    @model_validator(mode="after")
+    def profit_must_sum_to_100(self) -> "ProjectCreate":
+        if self.profit_type == ProfitType.percentage:
+            c = self.company_profit_value
+            d = self.developer_profit_value
+            if c is not None and d is not None and abs(c + d - 100) > 0.01:
+                raise ValueError("Company and developer profit percentages must sum to 100%")
+        return self
+
 
 class ProjectUpdate(BaseModel):
     project_name: Optional[str] = None
@@ -131,6 +140,16 @@ class ProjectUpdate(BaseModel):
     timeline_days: Optional[int] = None
     deadline: Optional[date] = None
     description: Optional[str] = None
+
+    @model_validator(mode="after")
+    def profit_must_sum_to_100(self) -> "ProjectUpdate":
+        pt = self.profit_type
+        c = self.company_profit_value
+        d = self.developer_profit_value
+        if pt == ProfitType.percentage and c is not None and d is not None:
+            if abs(c + d - 100) > 0.01:
+                raise ValueError("Company and developer profit percentages must sum to 100%")
+        return self
 
 
 class ProjectResponse(BaseModel):

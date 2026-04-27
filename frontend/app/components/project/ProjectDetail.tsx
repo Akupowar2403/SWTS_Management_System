@@ -13,24 +13,30 @@ interface Props { projectId: number; }
 
 // draft shape — only the editable fields
 interface Draft {
-  project_name:   string;
-  client_name:    string;   // free-text display value
-  client_id:      number | undefined;
-  developer_name: string;   // free-text display value
-  developer_id:   number | undefined;
-  status_id:      number | undefined;
-  deadline:       string;
+  project_name:          string;
+  client_name:           string;
+  client_id:             number | undefined;
+  developer_name:        string;
+  developer_id:          number | undefined;
+  status_id:             number | undefined;
+  deadline:              string;
+  profit_type:           "percentage" | "amount";
+  company_profit_value:  string;
+  developer_profit_value: string;
 }
 
 function toDraft(p: Project, clients: Client[], devs: Developer[]): Draft {
   return {
-    project_name:   p.project_name,
-    client_name:    p.client_name ?? clients.find((c) => c.id === p.client_id)?.name ?? "",
-    client_id:      p.client_id,
-    developer_name: p.developer_name ?? devs.find((d) => d.id === p.developer_id)?.name ?? "",
-    developer_id:   p.developer_id,
-    status_id:      p.status_id,
-    deadline:       p.deadline ?? "",
+    project_name:          p.project_name,
+    client_name:           p.client_name ?? clients.find((c) => c.id === p.client_id)?.name ?? "",
+    client_id:             p.client_id,
+    developer_name:        p.developer_name ?? devs.find((d) => d.id === p.developer_id)?.name ?? "",
+    developer_id:          p.developer_id,
+    status_id:             p.status_id,
+    deadline:              p.deadline ?? "",
+    profit_type:           p.profit_type ?? "percentage",
+    company_profit_value:  p.company_profit_value != null ? String(p.company_profit_value) : "",
+    developer_profit_value: p.developer_profit_value != null ? String(p.developer_profit_value) : "",
   };
 }
 
@@ -195,13 +201,16 @@ export default function ProjectDetail({ projectId }: Props) {
       const devIsFromDB     = devs.some((d) => d.name === draft.developer_name);
 
       const updated = await updateProject(project.id, {
-        project_name:   draft.project_name,
-        client_id:      clientIsFromDB  ? draft.client_id  : undefined,
-        client_name:    !clientIsFromDB ? draft.client_name  || undefined : undefined,
-        developer_id:   devIsFromDB     ? draft.developer_id : undefined,
-        developer_name: !devIsFromDB    ? draft.developer_name || undefined : undefined,
-        status_id:      draft.status_id,
-        deadline:       draft.deadline  || undefined,
+        project_name:          draft.project_name,
+        client_id:             clientIsFromDB  ? draft.client_id  : undefined,
+        client_name:           !clientIsFromDB ? draft.client_name  || undefined : undefined,
+        developer_id:          devIsFromDB     ? draft.developer_id : undefined,
+        developer_name:        !devIsFromDB    ? draft.developer_name || undefined : undefined,
+        status_id:             draft.status_id,
+        deadline:              draft.deadline  || undefined,
+        profit_type:           draft.profit_type,
+        company_profit_value:  draft.company_profit_value  !== "" ? Number(draft.company_profit_value)  : undefined,
+        developer_profit_value: draft.developer_profit_value !== "" ? Number(draft.developer_profit_value) : undefined,
       });
 
       setProject(updated);
@@ -326,6 +335,75 @@ export default function ProjectDetail({ projectId }: Props) {
             </div>
 
           </div>
+
+          {/* Profit Sharing */}
+          <div className="pt-2">
+            <div className="flex items-center justify-between mb-3">
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Profit Sharing
+              </label>
+              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 text-xs font-medium">
+                <button
+                  type="button"
+                  onClick={() => updateDraft({ profit_type: "percentage", company_profit_value: "", developer_profit_value: "" })}
+                  className={`px-3 py-1 rounded-md transition ${draft.profit_type === "percentage" ? "bg-white shadow text-blue-600" : "text-gray-500 hover:text-gray-700"}`}
+                >%</button>
+                <button
+                  type="button"
+                  onClick={() => updateDraft({ profit_type: "amount", company_profit_value: "", developer_profit_value: "" })}
+                  className={`px-3 py-1 rounded-md transition ${draft.profit_type === "amount" ? "bg-white shadow text-blue-600" : "text-gray-500 hover:text-gray-700"}`}
+                >₹</button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Company&apos;s Share ({draft.profit_type === "percentage" ? "%" : "₹"})</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={draft.profit_type === "percentage" ? 100 : undefined}
+                  value={draft.company_profit_value}
+                  placeholder={draft.profit_type === "percentage" ? "e.g. 70" : "e.g. 50000"}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (draft.profit_type === "percentage" && val !== "") {
+                      const n = Number(val);
+                      if (n >= 0 && n <= 100) {
+                        updateDraft({ company_profit_value: val, developer_profit_value: String(100 - n) });
+                        return;
+                      }
+                    }
+                    updateDraft({ company_profit_value: val });
+                  }}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Developer&apos;s Share ({draft.profit_type === "percentage" ? "%" : "₹"})</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={draft.profit_type === "percentage" ? 100 : undefined}
+                  value={draft.developer_profit_value}
+                  placeholder={draft.profit_type === "percentage" ? "e.g. 30" : "e.g. 20000"}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (draft.profit_type === "percentage" && val !== "") {
+                      const n = Number(val);
+                      if (n >= 0 && n <= 100) {
+                        updateDraft({ developer_profit_value: val, company_profit_value: String(100 - n) });
+                        return;
+                      }
+                    }
+                    updateDraft({ developer_profit_value: val });
+                  }}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
+                />
+              </div>
+            </div>
+
+          </div>
+
         </div>
 
         {/* Save / Cancel — only when dirty */}
@@ -376,7 +454,7 @@ export default function ProjectDetail({ projectId }: Props) {
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Profit Split</p>
           <p>
             {project.company_profit_value != null
-              ? `Company ${project.company_profit_value}${project.profit_type === "percentage" ? "%" : "₹"} / Dev ${project.developer_profit_value}${project.profit_type === "percentage" ? "%" : "₹"}`
+              ? `Company ${project.company_profit_value}${project.profit_type === "percentage" ? "%" : " ₹"} / Dev ${project.developer_profit_value}${project.profit_type === "percentage" ? "%" : " ₹"}`
               : "—"}
           </p>
         </div>

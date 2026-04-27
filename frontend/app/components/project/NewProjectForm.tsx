@@ -535,14 +535,14 @@ export default function NewProjectForm() {
           <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 text-xs font-medium">
             <button
               type="button"
-              onClick={() => setProfitType("percentage")}
+              onClick={() => { setProfitType("percentage"); setCompanyProfit(""); setDevProfit(""); }}
               className={`px-3 py-1 rounded-md transition ${profitType === "percentage" ? "bg-white shadow text-blue-600" : "text-gray-500 hover:text-gray-700"}`}
             >
               %
             </button>
             <button
               type="button"
-              onClick={() => setProfitType("amount")}
+              onClick={() => { setProfitType("amount"); setCompanyProfit(""); setDevProfit(""); }}
               className={`px-3 py-1 rounded-md transition ${profitType === "amount" ? "bg-white shadow text-blue-600" : "text-gray-500 hover:text-gray-700"}`}
             >
               ₹
@@ -554,23 +554,40 @@ export default function NewProjectForm() {
             <input
               type="number"
               min={0}
+              max={profitType === "percentage" ? 100 : undefined}
               className={inputCls}
               placeholder={profitType === "percentage" ? "e.g. 70" : "e.g. 50000"}
               value={companyProfit}
-              onChange={(e) => setCompanyProfit(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setCompanyProfit(val);
+                if (profitType === "percentage" && val !== "") {
+                  const n = Number(val);
+                  if (n >= 0 && n <= 100) setDevProfit(String(100 - n));
+                }
+              }}
             />
           </Field>
           <Field label={`Developer's Share (${profitType === "percentage" ? "%" : "₹"})`}>
             <input
               type="number"
               min={0}
+              max={profitType === "percentage" ? 100 : undefined}
               className={inputCls}
               placeholder={profitType === "percentage" ? "e.g. 30" : "e.g. 20000"}
               value={devProfit}
-              onChange={(e) => setDevProfit(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setDevProfit(val);
+                if (profitType === "percentage" && val !== "") {
+                  const n = Number(val);
+                  if (n >= 0 && n <= 100) setCompanyProfit(String(100 - n));
+                }
+              }}
             />
           </Field>
         </div>
+
       </div>
 
       {/* ── Timeline & Status ── */}
