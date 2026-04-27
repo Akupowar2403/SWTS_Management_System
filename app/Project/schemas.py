@@ -105,6 +105,7 @@ class ProjectCreate(BaseModel):
     lead_source_id: Optional[int] = None
     status_id: Optional[int] = None
     company_name: Optional[CompanyName] = None
+    is_inhouse_developer: bool = False
     profit_type: ProfitType = ProfitType.percentage
     company_profit_value: Optional[float] = None
     developer_profit_value: Optional[float] = None
@@ -115,6 +116,8 @@ class ProjectCreate(BaseModel):
 
     @model_validator(mode="after")
     def profit_must_sum_to_100(self) -> "ProjectCreate":
+        if self.is_inhouse_developer:
+            return self
         if self.profit_type == ProfitType.percentage:
             c = self.company_profit_value
             d = self.developer_profit_value
@@ -132,6 +135,7 @@ class ProjectUpdate(BaseModel):
     lead_source_id: Optional[int] = None
     status_id: Optional[int] = None
     company_name: Optional[CompanyName] = None
+    is_inhouse_developer: Optional[bool] = None
     profit_type: Optional[ProfitType] = None
     company_profit_value: Optional[float] = None
     developer_profit_value: Optional[float] = None
@@ -143,6 +147,8 @@ class ProjectUpdate(BaseModel):
 
     @model_validator(mode="after")
     def profit_must_sum_to_100(self) -> "ProjectUpdate":
+        if self.is_inhouse_developer:
+            return self
         pt = self.profit_type
         c = self.company_profit_value
         d = self.developer_profit_value
@@ -162,6 +168,7 @@ class ProjectResponse(BaseModel):
     lead_source_id: Optional[int]
     status_id: Optional[int]
     company_name: Optional[CompanyName]
+    is_inhouse_developer: bool
     profit_type: ProfitType
     company_profit_value: Optional[float]
     developer_profit_value: Optional[float]

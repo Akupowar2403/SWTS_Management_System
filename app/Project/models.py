@@ -109,6 +109,7 @@ class Project(Base):
     company_profit_value = Column(Float, nullable=True)
     developer_profit_value = Column(Float, nullable=True)
     show_ppp = Column(Boolean, default=False, nullable=False)
+    is_inhouse_developer = Column(Boolean, default=False, nullable=False)
 
     start_date = Column(Date, nullable=True)
     timeline_days = Column(Integer, nullable=True)

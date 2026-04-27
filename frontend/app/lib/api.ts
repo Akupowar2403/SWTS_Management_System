@@ -95,7 +95,7 @@ export async function getProject(projectId: number): Promise<Project> {
 
 export async function updateProject(
   projectId: number,
-  payload: Partial<Pick<Project, "project_name" | "client_id" | "client_name" | "developer_id" | "developer_name" | "status_id" | "deadline" | "description" | "start_date" | "timeline_days" | "company_name" | "profit_type" | "company_profit_value" | "developer_profit_value">>
+  payload: Partial<Pick<Project, "project_name" | "client_id" | "client_name" | "developer_id" | "developer_name" | "status_id" | "deadline" | "description" | "start_date" | "timeline_days" | "company_name" | "is_inhouse_developer" | "profit_type" | "company_profit_value" | "developer_profit_value">>
 ): Promise<Project> {
   return apiFetch(`${API_BASE}/projects/${projectId}`, {
     method: "PATCH",
@@ -171,6 +171,7 @@ export interface NewProjectPayload {
   lead_source_id?: number;
   status_id?: number;
   company_name?: "SWTS" | "SWTS Pvt. Ltd.";
+  is_inhouse_developer?: boolean;
   profit_type?: "percentage" | "amount";
   company_profit_value?: number;
   developer_profit_value?: number;

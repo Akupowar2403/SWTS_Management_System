@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  getClients, getDevelopers, getLeadSources, getProjectStatuses,
+  getClients, getDevelopers, getLeadSources, getProjectStatuses, getUsers,
   createClient, createDeveloper, createProject,
   NewClientPayload, NewDeveloperPayload,
 } from "../../lib/api";
 import { Client, Developer, LeadSource, ProjectStatus } from "../../types/project";
+
+type KCUser = { id: string; username: string; name: string; email: string };
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -177,15 +179,18 @@ function ClientSection({
 type DevMode = "search" | "new";
 
 function DeveloperSection({
-  devs,
+  devs, keycloakUsers,
   devMode, setDevMode,
   selectedDev, setSelectedDev,
+  selectedInhouse, setSelectedInhouse,
   freeText, setFreeText,
   newData, setNewData,
 }: {
   devs: Developer[];
+  keycloakUsers: KCUser[];
   devMode: DevMode; setDevMode: (m: DevMode) => void;
   selectedDev: Developer | null; setSelectedDev: (d: Developer | null) => void;
+  selectedInhouse: KCUser | null; setSelectedInhouse: (u: KCUser | null) => void;
   freeText: string; setFreeText: (v: string) => void;
   newData: NewDeveloperPayload; setNewData: (d: NewDeveloperPayload) => void;
 }) {
@@ -201,24 +206,24 @@ function DeveloperSection({
     return () => window.removeEventListener("mousedown", h);
   }, []);
 
-  const filtered = devs
+  const filteredInhouse = keycloakUsers
+    .filter((u) => !search || (u.name || u.username).toLowerCase().includes(search.toLowerCase()))
+    .slice(0, 8);
+
+  const filteredDevs = devs
     .filter((d) => !search || d.name.toLowerCase().includes(search.toLowerCase()))
     .slice(0, 8);
 
-  const displayValue = selectedDev ? selectedDev.name : freeText;
+  const displayValue = selectedInhouse
+    ? (selectedInhouse.name || selectedInhouse.username)
+    : (selectedDev ? selectedDev.name : freeText);
 
   if (devMode === "new") {
     return (
       <div className="border border-blue-200 rounded-xl p-4 bg-blue-50/40 space-y-3">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold text-blue-700 uppercase tracking-wider">New Developer</p>
-          <button
-            type="button"
-            onClick={() => setDevMode("search")}
-            className="text-xs text-gray-500 hover:text-gray-800 underline"
-          >
-            Cancel
-          </button>
+          <p className="text-xs font-semibold text-blue-700 uppercase tracking-wider">New Freelancer</p>
+          <button type="button" onClick={() => setDevMode("search")} className="text-xs text-gray-500 hover:text-gray-800 underline">Cancel</button>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Name" required>
@@ -260,12 +265,13 @@ function DeveloperSection({
       <input
         type="text"
         className={inputCls}
-        placeholder="Search or type developer name…"
+        placeholder="Search team or freelancer…"
         value={displayValue}
         onFocus={() => setOpen(true)}
         onChange={(e) => {
           setFreeText(e.target.value);
           setSelectedDev(null);
+          setSelectedInhouse(null);
           setSearch(e.target.value);
           setOpen(true);
         }}
@@ -275,33 +281,55 @@ function DeveloperSection({
           <button
             type="button"
             onMouseDown={(e) => e.preventDefault()}
-            onClick={() => { setDevMode("new"); setOpen(false); setFreeText(""); setSelectedDev(null); }}
+            onClick={() => { setDevMode("new"); setOpen(false); setFreeText(""); setSelectedDev(null); setSelectedInhouse(null); }}
             className="w-full text-left px-3 py-2.5 text-sm font-semibold text-blue-600 hover:bg-blue-50 border-b border-gray-100"
           >
-            + New Developer
+            + New Freelancer
           </button>
           <input
             type="text"
-            placeholder="Search existing…"
+            placeholder="Search…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full px-3 py-2 text-sm border-b border-gray-100 focus:outline-none"
           />
-          <div className="max-h-44 overflow-y-auto">
-            {filtered.length === 0 && (
-              <p className="px-3 py-2 text-xs text-gray-400">No developers found</p>
+          <div className="max-h-52 overflow-y-auto">
+            {filteredInhouse.length > 0 && (
+              <>
+                <p className="px-3 pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Team Members</p>
+                {filteredInhouse.map((u) => (
+                  <button
+                    key={u.id}
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => { setSelectedInhouse(u); setSelectedDev(null); setFreeText(""); setOpen(false); setSearch(""); }}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 transition flex items-center gap-2"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+                    {u.name || u.username}
+                  </button>
+                ))}
+              </>
             )}
-            {filtered.map((d) => (
-              <button
-                key={d.id}
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => { setSelectedDev(d); setFreeText(""); setOpen(false); setSearch(""); }}
-                className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 transition"
-              >
-                {d.name}
-              </button>
-            ))}
+            {filteredDevs.length > 0 && (
+              <>
+                <p className="px-3 pt-2 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Freelancers</p>
+                {filteredDevs.map((d) => (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => { setSelectedDev(d); setSelectedInhouse(null); setFreeText(""); setOpen(false); setSearch(""); }}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 transition"
+                  >
+                    {d.name}
+                  </button>
+                ))}
+              </>
+            )}
+            {filteredInhouse.length === 0 && filteredDevs.length === 0 && (
+              <p className="px-3 py-2 text-xs text-gray-400">No results found</p>
+            )}
           </div>
         </div>
       )}
@@ -314,10 +342,11 @@ function DeveloperSection({
 export default function NewProjectForm() {
   const router = useRouter();
 
-  const [clients,  setClients]  = useState<Client[]>([]);
-  const [devs,     setDevs]     = useState<Developer[]>([]);
-  const [sources,  setSources]  = useState<LeadSource[]>([]);
-  const [statuses, setStatuses] = useState<ProjectStatus[]>([]);
+  const [clients,       setClients]       = useState<Client[]>([]);
+  const [devs,          setDevs]          = useState<Developer[]>([]);
+  const [keycloakUsers, setKeycloakUsers] = useState<KCUser[]>([]);
+  const [sources,       setSources]       = useState<LeadSource[]>([]);
+  const [statuses,      setStatuses]      = useState<ProjectStatus[]>([]);
   const [loading,  setLoading]  = useState(true);
   const [saving,   setSaving]   = useState(false);
   const [error,    setError]    = useState<string | null>(null);
@@ -332,10 +361,11 @@ export default function NewProjectForm() {
   });
 
   // developer state
-  const [devMode,     setDevMode]     = useState<DevMode>("search");
-  const [selectedDev, setSelectedDev] = useState<Developer | null>(null);
-  const [devFreeText, setDevFreeText] = useState("");
-  const [newDevData,  setNewDevData]  = useState<NewDeveloperPayload>({
+  const [devMode,          setDevMode]          = useState<DevMode>("search");
+  const [selectedDev,      setSelectedDev]      = useState<Developer | null>(null);
+  const [selectedInhouse,  setSelectedInhouse]  = useState<KCUser | null>(null);
+  const [devFreeText,      setDevFreeText]      = useState("");
+  const [newDevData,       setNewDevData]       = useState<NewDeveloperPayload>({
     name: "", contact_no: "", email: "", type: "individual",
     residential_address: "", description: "",
     default_profit_sharing_percentage: undefined,
@@ -363,12 +393,13 @@ export default function NewProjectForm() {
   }, [startDate, timelineDays]);
 
   useEffect(() => {
-    Promise.all([getClients(), getDevelopers(), getLeadSources(), getProjectStatuses()])
-      .then(([cls, dvs, srcs, stats]) => {
+    Promise.all([getClients(), getDevelopers(), getLeadSources(), getProjectStatuses(), getUsers()])
+      .then(([cls, dvs, srcs, stats, kUsers]) => {
         setClients(cls);
         setDevs(dvs);
         setSources(srcs);
         setStatuses(stats);
+        setKeycloakUsers(kUsers);
         // default status to "In Touch"
         const inTouch = stats.find((s) => s.name.toLowerCase() === "in touch");
         if (inTouch) setStatusId(inTouch.id);
@@ -402,8 +433,9 @@ export default function NewProjectForm() {
         clientNameVal = undefined;
       }
 
-      let devId: number | undefined = selectedDev?.id;
-      let devNameVal: string | undefined = devFreeText || undefined;
+      let devId: number | undefined;
+      let devNameVal: string | undefined;
+      let isInhouse = false;
 
       if (devMode === "new") {
         if (!newDevData.name || !newDevData.contact_no || !newDevData.email || !newDevData.residential_address || !newDevData.description) {
@@ -414,9 +446,18 @@ export default function NewProjectForm() {
         const created = await createDeveloper(newDevData);
         devId = created.id;
         devNameVal = undefined;
+        isInhouse = false;
+      } else if (selectedInhouse) {
+        devId = undefined;
+        devNameVal = selectedInhouse.name || selectedInhouse.username;
+        isInhouse = true;
       } else if (selectedDev) {
         devId = selectedDev.id;
         devNameVal = undefined;
+        isInhouse = false;
+      } else {
+        devNameVal = devFreeText || undefined;
+        isInhouse = false;
       }
 
       const project = await createProject({
@@ -428,9 +469,10 @@ export default function NewProjectForm() {
         lead_source_id:         leadSourceId,
         status_id:              statusId,
         company_name:           companyName || undefined,
+        is_inhouse_developer:   isInhouse,
         profit_type:            profitType,
-        company_profit_value:   companyProfit ? Number(companyProfit) : undefined,
-        developer_profit_value: devProfit ? Number(devProfit) : undefined,
+        company_profit_value:   isInhouse ? undefined : (companyProfit ? Number(companyProfit) : undefined),
+        developer_profit_value: isInhouse ? undefined : (devProfit ? Number(devProfit) : undefined),
         start_date:             startDate || undefined,
         timeline_days:          timelineDays ? Number(timelineDays) : undefined,
         deadline:               deadline || undefined,
@@ -521,14 +563,18 @@ export default function NewProjectForm() {
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Developer / Freelancer</p>
         <DeveloperSection
           devs={devs}
+          keycloakUsers={keycloakUsers}
           devMode={devMode} setDevMode={setDevMode}
           selectedDev={selectedDev} setSelectedDev={setSelectedDev}
+          selectedInhouse={selectedInhouse}
+          setSelectedInhouse={(u) => { setSelectedInhouse(u); if (u) { setCompanyProfit(""); setDevProfit(""); } }}
           freeText={devFreeText} setFreeText={setDevFreeText}
           newData={newDevData} setNewData={setNewDevData}
         />
       </div>
 
       {/* ── Profit ── */}
+      {!selectedInhouse && devMode !== "new" && (
       <div className="bg-white border border-gray-200 rounded-xl p-6 mb-5 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Profit Sharing</p>
@@ -589,6 +635,7 @@ export default function NewProjectForm() {
         </div>
 
       </div>
+      )}
 
       {/* ── Timeline & Status ── */}
       <div className="bg-white border border-gray-200 rounded-xl p-6 mb-5 shadow-sm space-y-4">

@@ -48,6 +48,7 @@ export interface Project {
   lead_source_id?: number;
   status_id?: number;
   company_name?: CompanyName;
+  is_inhouse_developer: boolean;
   profit_type: ProfitType;
   company_profit_value?: number;
   developer_profit_value?: number;
