@@ -4,6 +4,8 @@ from datetime import date, datetime
 from app.Project.models import ClientType, Citizenship, DeveloperType, ProfitType, CompanyName
 
 
+
+
 # ── LeadSource ────────────────────────────────────────────────────────────────
 
 class LeadSourceCreate(BaseModel):
@@ -185,6 +187,32 @@ class ProjectResponse(BaseModel):
     developer: Optional[DeveloperResponse] = None
     status: Optional[ProjectStatusResponse] = None
     lead_source: Optional[LeadSourceResponse] = None
+
+    class Config:
+        from_attributes = True
+
+
+# ── ProjectComment ─────────────────────────────────────────────────────────────
+
+class CommentCreate(BaseModel):
+    body: str
+    commented_at: datetime  # user-supplied; frontend defaults to now()
+
+
+class CommentUpdate(BaseModel):
+    body: Optional[str] = None
+    commented_at: Optional[datetime] = None
+
+
+class CommentResponse(BaseModel):
+    id: int
+    project_id: int
+    body: str
+    commented_at: datetime
+    created_by: str
+    author_name: str
+    created_at: datetime
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

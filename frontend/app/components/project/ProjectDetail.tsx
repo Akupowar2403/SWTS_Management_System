@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Project, ProjectStatus, Client, Developer } from "../../types/project";
+import { Project, ProjectStatus, Client, Developer, ProjectComment } from "../../types/project";
 import {
   getProject, updateProject,
   getProjectStatuses, getClients, getDevelopers, getUsers,
   createClient, createDeveloper,
+  getComments, createComment, updateComment, deleteComment,
   NewClientPayload, NewDeveloperPayload,
 } from "../../lib/api";
 
@@ -414,6 +415,19 @@ export default function ProjectDetail({ projectId }: Props) {
   const [saving,   setSaving]   = useState(false);
   const [error,    setError]    = useState<string | null>(null);
 
+  // tab
+  const [activeTab, setActiveTab] = useState<"overview" | "comments">("overview");
+
+  // comments
+  const [comments,      setComments]      = useState<ProjectComment[]>([]);
+  const [commentBody,   setCommentBody]   = useState("");
+  const [commentDate,   setCommentDate]   = useState(() => new Date().toISOString().slice(0, 16));
+  const [submitting,    setSubmitting]    = useState(false);
+  const [commentError,  setCommentError]  = useState<string | null>(null);
+  const [editingId,     setEditingId]     = useState<number | null>(null);
+  const [editBody,      setEditBody]      = useState("");
+  const [editDate,      setEditDate]      = useState("");
+
   const [draft,    setDraft]    = useState<Draft | null>(null);
   const [original, setOriginal] = useState<Draft | null>(null);
 
@@ -472,6 +486,57 @@ export default function ProjectDetail({ projectId }: Props) {
       .catch(() => setError("Failed to load project."))
       .finally(() => setLoading(false));
   }, [projectId]);
+
+  const [commentsFetched, setCommentsFetched] = useState(false);
+  useEffect(() => {
+    if (activeTab === "comments" && !commentsFetched) {
+      getComments(projectId)
+        .then((data) => { setComments(data); setCommentsFetched(true); })
+        .catch(() => setCommentError("Failed to load comments."));
+    }
+  }, [activeTab, commentsFetched, projectId]);
+
+  const handleAddComment = async () => {
+    if (!commentBody.trim()) return;
+    setSubmitting(true);
+    setCommentError(null);
+    try {
+      const created = await createComment(projectId, {
+        body: commentBody.trim(),
+        commented_at: new Date(commentDate).toISOString(),
+      });
+      setComments((prev) => [created, ...prev]);
+      setCommentBody("");
+      setCommentDate(new Date().toISOString().slice(0, 16));
+    } catch {
+      setCommentError("Failed to post comment.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleEditSave = async (comment: ProjectComment) => {
+    if (!editBody.trim()) return;
+    try {
+      const updated = await updateComment(projectId, comment.id, {
+        body: editBody.trim(),
+        commented_at: new Date(editDate).toISOString(),
+      });
+      setComments((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+      setEditingId(null);
+    } catch {
+      setCommentError("Failed to update comment.");
+    }
+  };
+
+  const handleDeleteComment = async (commentId: number) => {
+    try {
+      await deleteComment(projectId, commentId);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+    } catch {
+      setCommentError("Failed to delete comment.");
+    }
+  };
 
   const dirty =
     (draft && original ? isDirty(draft, original) : false) ||
@@ -816,39 +881,172 @@ export default function ProjectDetail({ projectId }: Props) {
       {/* ── Tabs ── */}
       <div className="border-b border-gray-200 mb-6">
         <nav className="flex gap-6">
-          <button className="pb-3 text-sm font-semibold text-blue-600 border-b-2 border-blue-600">
-            Overview
-          </button>
+          {(["overview", "comments"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`pb-3 text-sm font-semibold capitalize transition ${
+                activeTab === tab
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-400 hover:text-gray-700"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
         </nav>
       </div>
 
       {/* ── Overview tab ── */}
-      <div className="grid grid-cols-2 gap-6 text-sm text-gray-700">
-        <div>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Company</p>
-          <p>{project.company_name ?? "—"}</p>
+      {activeTab === "overview" && (
+        <div className="grid grid-cols-2 gap-6 text-sm text-gray-700">
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Company</p>
+            <p>{project.company_name ?? "—"}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Start Date</p>
+            <p>{project.start_date ? new Date(project.start_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Timeline</p>
+            <p>{project.timeline_days ? `${project.timeline_days} days` : "—"}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Profit Split</p>
+            <p>
+              {project.company_profit_value != null
+                ? `Company ${project.company_profit_value}${project.profit_type === "percentage" ? "%" : " ₹"} / Dev ${project.developer_profit_value}${project.profit_type === "percentage" ? "%" : " ₹"}`
+                : "—"}
+            </p>
+          </div>
+          <div className="col-span-2">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Description</p>
+            <p className="text-gray-600 leading-relaxed">{project.description ?? "—"}</p>
+          </div>
         </div>
-        <div>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Start Date</p>
-          <p>{project.start_date ? new Date(project.start_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p>
+      )}
+
+      {/* ── Comments tab ── */}
+      {activeTab === "comments" && (
+        <div className="space-y-6">
+
+          {/* Add comment box */}
+          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm space-y-3">
+            <textarea
+              rows={3}
+              placeholder="Write a comment…"
+              value={commentBody}
+              onChange={(e) => setCommentBody(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 resize-none"
+            />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-gray-500 shrink-0">Date &amp; time</label>
+                <input
+                  type="datetime-local"
+                  value={commentDate}
+                  onChange={(e) => setCommentDate(e.target.value)}
+                  className="text-xs px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400"
+                />
+                <button
+                  type="button"
+                  onClick={() => setCommentDate(new Date().toISOString().slice(0, 16))}
+                  className="text-xs text-blue-600 hover:underline shrink-0"
+                >
+                  Now
+                </button>
+              </div>
+              <button
+                onClick={handleAddComment}
+                disabled={submitting || !commentBody.trim()}
+                className="px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+              >
+                {submitting ? "Posting…" : "Post"}
+              </button>
+            </div>
+            {commentError && <p className="text-xs text-red-500">{commentError}</p>}
+          </div>
+
+          {/* Comment list */}
+          {comments.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-8">No comments yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {comments.map((c) => (
+                <div key={c.id} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                  {editingId === c.id ? (
+                    <div className="space-y-3">
+                      <textarea
+                        rows={3}
+                        value={editBody}
+                        onChange={(e) => setEditBody(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 resize-none"
+                      />
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs text-gray-500 shrink-0">Date &amp; time</label>
+                        <input
+                          type="datetime-local"
+                          value={editDate}
+                          onChange={(e) => setEditDate(e.target.value)}
+                          className="text-xs px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEditSave(c)}
+                          className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div>
+                          <span className="text-xs font-semibold text-gray-700">{c.author_name}</span>
+                          <span className="mx-1.5 text-gray-300">·</span>
+                          <span className="text-xs text-gray-400">
+                            {new Date(c.commented_at).toLocaleString("en-IN", {
+                              day: "2-digit", month: "short", year: "numeric",
+                              hour: "2-digit", minute: "2-digit",
+                            })}
+                          </span>
+                          {c.updated_at && (
+                            <span className="ml-2 text-xs text-gray-400 italic">(edited)</span>
+                          )}
+                        </div>
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={() => { setEditingId(c.id); setEditBody(c.body); setEditDate(new Date(c.commented_at).toISOString().slice(0, 16)); }}
+                            className="text-xs text-gray-400 hover:text-blue-600 transition"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteComment(c.id)}
+                            className="text-xs text-gray-400 hover:text-red-500 transition"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{c.body}</p>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        <div>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Timeline</p>
-          <p>{project.timeline_days ? `${project.timeline_days} days` : "—"}</p>
-        </div>
-        <div>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Profit Split</p>
-          <p>
-            {project.company_profit_value != null
-              ? `Company ${project.company_profit_value}${project.profit_type === "percentage" ? "%" : " ₹"} / Dev ${project.developer_profit_value}${project.profit_type === "percentage" ? "%" : " ₹"}`
-              : "—"}
-          </p>
-        </div>
-        <div className="col-span-2">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Description</p>
-          <p className="text-gray-600 leading-relaxed">{project.description ?? "—"}</p>
-        </div>
-      </div>
+      )}
 
     </div>
   );

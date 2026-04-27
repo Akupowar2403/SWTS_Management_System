@@ -64,3 +64,14 @@ export interface Project {
   status?: ProjectStatus;
   lead_source?: LeadSource;
 }
+
+export interface ProjectComment {
+  id: number;
+  project_id: number;
+  body: string;
+  commented_at: string;
+  created_by: string;
+  author_name: string;
+  created_at: string;
+  updated_at?: string;
+}

@@ -1,5 +1,5 @@
 import { CalendarEvent } from "../types/event";
-import { Project, ProjectStatus, Client, Developer, LeadSource } from "../types/project";
+import { Project, ProjectStatus, Client, Developer, LeadSource, ProjectComment } from "../types/project";
 import { keycloakToken } from "../auth/keycloak";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -187,4 +187,44 @@ export async function createProject(payload: NewProjectPayload): Promise<Project
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
+}
+
+// ── Comments ──────────────────────────────────────────────────────────────────
+
+export async function getComments(projectId: number): Promise<ProjectComment[]> {
+  return apiFetch(`${API_BASE}/projects/${projectId}/comments`);
+}
+
+export async function createComment(
+  projectId: number,
+  payload: { body: string; commented_at: string }
+): Promise<ProjectComment> {
+  return apiFetch(`${API_BASE}/projects/${projectId}/comments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateComment(
+  projectId: number,
+  commentId: number,
+  payload: { body?: string; commented_at?: string }
+): Promise<ProjectComment> {
+  return apiFetch(`${API_BASE}/projects/${projectId}/comments/${commentId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteComment(projectId: number, commentId: number): Promise<void> {
+  const token = keycloakToken();
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(`${API_BASE}/projects/${projectId}/comments/${commentId}`, {
+    method: "DELETE",
+    headers,
+  });
+  if (!res.ok) throw new Error(`Delete failed ${res.status}`);
 }

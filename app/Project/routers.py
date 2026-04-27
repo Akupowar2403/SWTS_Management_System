@@ -4,13 +4,14 @@ from typing import List, Optional
 from datetime import timedelta, date as date_type
 
 from app.calendar.database import get_db
-from app.Project.models import Project, ProjectStatus, Client, Developer, LeadSource
+from app.Project.models import Project, ProjectStatus, Client, Developer, LeadSource, ProjectComment
 from app.Project.schemas import (
     ProjectCreate, ProjectResponse, ProjectUpdate,
     ProjectStatusUpdate, ProjectStatusResponse,
     ClientCreate, ClientResponse,
     DeveloperCreate, DeveloperResponse,
     LeadSourceResponse,
+    CommentCreate, CommentUpdate, CommentResponse,
 )
 from app.auth.dependencies import get_current_user
 
@@ -189,3 +190,87 @@ async def toggle_ppp(
     db.commit()
     db.refresh(project)
     return project
+
+
+# ── Comments ──────────────────────────────────────────────────────────────────
+
+@router.get("/{project_id}/comments", response_model=List[CommentResponse])
+async def list_comments(
+    project_id: int,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
+    if not db.query(Project).filter(Project.id == project_id).first():
+        raise HTTPException(status_code=404, detail="Project not found")
+    return (
+        db.query(ProjectComment)
+        .filter(ProjectComment.project_id == project_id)
+        .order_by(ProjectComment.commented_at.desc())
+        .all()
+    )
+
+
+@router.post("/{project_id}/comments", response_model=CommentResponse, status_code=201)
+async def create_comment(
+    project_id: int,
+    payload: CommentCreate,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
+    if not db.query(Project).filter(Project.id == project_id).first():
+        raise HTTPException(status_code=404, detail="Project not found")
+    comment = ProjectComment(
+        project_id=project_id,
+        body=payload.body,
+        commented_at=payload.commented_at,
+        created_by=user["id"],
+        author_name=user.get("name") or user.get("preferred_username") or user["id"],
+    )
+    db.add(comment)
+    db.commit()
+    db.refresh(comment)
+    return comment
+
+
+@router.patch("/{project_id}/comments/{comment_id}", response_model=CommentResponse)
+async def update_comment(
+    project_id: int,
+    comment_id: int,
+    payload: CommentUpdate,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
+    comment = (
+        db.query(ProjectComment)
+        .filter(ProjectComment.id == comment_id, ProjectComment.project_id == project_id)
+        .first()
+    )
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    if comment.created_by != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only edit your own comments")
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(comment, field, value)
+    db.commit()
+    db.refresh(comment)
+    return comment
+
+
+@router.delete("/{project_id}/comments/{comment_id}", status_code=204)
+async def delete_comment(
+    project_id: int,
+    comment_id: int,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
+    comment = (
+        db.query(ProjectComment)
+        .filter(ProjectComment.id == comment_id, ProjectComment.project_id == project_id)
+        .first()
+    )
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    if comment.created_by != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only delete your own comments")
+    db.delete(comment)
+    db.commit()

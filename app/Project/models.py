@@ -125,3 +125,23 @@ class Project(Base):
     developer = relationship("Developer", back_populates="projects")
     status = relationship("ProjectStatus", back_populates="projects")
     lead_source = relationship("LeadSource", back_populates="projects")
+    comments = relationship(
+        "ProjectComment", back_populates="project",
+        cascade="all, delete-orphan",
+        order_by="ProjectComment.commented_at.desc()",
+    )
+
+
+class ProjectComment(Base):
+    __tablename__ = "project_comments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True)
+    body = Column(Text, nullable=False)
+    commented_at = Column(DateTime(timezone=True), nullable=False)  # user-supplied date/time
+    created_by = Column(String(36), nullable=False)    # Keycloak UUID
+    author_name = Column(String(255), nullable=False)  # display name snapshot at post time
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    project = relationship("Project", back_populates="comments")
